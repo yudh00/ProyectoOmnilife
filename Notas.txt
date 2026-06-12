@@ -1,0 +1,38 @@
+Primero confirmar que Node y PostgreSQL están instalados:
+    node -v
+    npm -v
+    psql --version
+
+Paso 1: Inicializa el proyecto Node
+En la carpeta raíz del proyecto hay que ejecutar:
+    npm init -y
+
+Paso 2: Instalar las dependencias
+    npm install pg dotenv
+    npm install --save-dev nodemon
+
+Paso 3: Estructura de carpetas
+Proyecto Omnilife Store/
+├── data/                      ← carpeta de datos (el script .sql aquí)
+├── src/
+│   └── config/
+│       └── db.js              ← archivo de conexión
+├── .env                       ← credenciales (NO se sube a git)
+├── .gitignore
+├── package.json
+└── index.js                   ← punto de entrada / prueba
+
+Paso 4: Crear el archivo .env
+En la raíz, crea .env con tus credenciales reales:
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_NAME=ProyectoIngeneria
+    DB_USER=postgres
+    DB_PASSWORD=tu_contraseña_aqui
+
+Paso 5: Crear el .gitignore
+Para no subir credenciales ni dependencias al repo:
+    node_modules/
+    .env
+
+Paso 6: El archivo de conexión src/config/db.js (Ya probado y funcionando)
