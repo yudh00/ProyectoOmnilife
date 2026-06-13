@@ -169,6 +169,10 @@ PATCH http://localhost:3000/api/ventas/pedidos/1/estado
 -- Ver productos con stock bajo
 GET  http://localhost:3000/api/ventas/inventario/stock-bajo
 
+GET http://localhost:3000/api/clientes
+
+
+
 
 ---------------------------------------------------------------------
 7. ESTADOS DEL PEDIDO (maquina de estados)

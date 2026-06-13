@@ -33,6 +33,26 @@ En la raíz, crea .env con tus credenciales reales:
 Paso 5: Crear el .gitignore
 Para no subir credenciales ni dependencias al repo:
     node_modules/
-    .env
 
 Paso 6: El archivo de conexión src/config/db.js (Ya probado y funcionando)
+
+
+5. COMO LEVANTAR EL PROYECTO
+
+PREREQUISITOS:
+  node -v        (debe tener Node.js instalado)
+  psql --version (debe tener PostgreSQL instalado)
+
+BACKEND (Terminal 1):
+  cd <raiz del proyecto>
+  npm install        <- solo la primera vez
+  node server.js
+  -> Servidor en http://localhost:3000
+
+FRONTEND (Terminal 2):
+  cd Presentation
+  npm install        <- solo la primera vez
+  npm run dev
+  -> App en http://localhost:5173
+
+ORDEN: levantar el backend primero, luego el frontend.
