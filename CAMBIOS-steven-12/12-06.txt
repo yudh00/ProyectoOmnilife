@@ -1,0 +1,182 @@
+=====================================================================
+CAMBIOS Y CONFIGURACION INICIAL - MODULO CATALOGO Y VENTAS
+Fecha: 2026-06-13
+Autor: Steven
+=====================================================================
+
+
+---------------------------------------------------------------------
+1. CAMBIO EN CODIGO - src/ventas/repositories/ventas.repository.js
+---------------------------------------------------------------------
+Linea 7 - Path de importacion corregido:
+
+  ANTES:  const db = require('../../../config/db');
+  AHORA:  const db = require('../../config/db');
+
+Razon: El archivo esta en src/ventas/repositories/ y necesita
+subir solo 2 niveles para llegar a src/config/db.js, no 3.
+
+
+---------------------------------------------------------------------
+2. ARCHIVOS NUEVOS AGREGADOS
+---------------------------------------------------------------------
+  server.js                               <- servidor Express principal
+  src/ventas/routes/ventas.routes.js      <- endpoints REST
+  src/ventas/controllers/ventas.controller.js
+  src/ventas/services/ventas.service.js
+  src/ventas/repositories/ventas.repository.js
+  data/sp/01_sp_catalogo_ventas.sql       <- stored procedures
+
+
+---------------------------------------------------------------------
+3. BASE DE DATOS - COMO CONFIGURAR (primera vez)
+---------------------------------------------------------------------
+
+Paso 1 - Crear la BD y tablas:
+  psql -U postgres -f "data/Script BD and Tablas.sql"
+
+Paso 2 - Cargar los Stored Procedures:
+  psql -U postgres -d ProyectoIngeneria -f "data/sp/01_sp_catalogo_ventas.sql"
+
+Paso 3 - Crear el archivo .env en la raiz del proyecto:
+  DB_HOST=localhost
+  DB_PORT=5432
+  DB_NAME=ProyectoIngeneria
+  DB_USER=postgres
+  DB_PASSWORD=tu_contrasenna
+
+Stored Procedures creados:
+  - sp_obtener_catalogo(p_id_categoria, p_busqueda)
+  - sp_obtener_categorias()
+  - sp_obtener_producto_por_id(p_id_producto)
+  - sp_validar_stock(p_id_producto, p_cantidad)
+  - sp_crear_pedido(p_id_cliente, p_id_carrito, p_impuesto_pct)
+  - sp_listar_pedidos_cliente(p_id_cliente)
+  - sp_obtener_detalle_pedido(p_id_pedido)
+  - sp_listar_pedidos_admin(p_id_estado)
+  - sp_actualizar_estado_pedido(p_id_pedido, p_nuevo_id_estado)
+  - sp_obtener_productos_stock_bajo()
+  - sp_agregar_a_carrito(p_id_cliente, p_id_producto, p_cantidad)
+  - sp_obtener_carrito(p_id_cliente)
+  - sp_eliminar_producto_carrito(p_id_carrito, p_id_producto)
+
+
+---------------------------------------------------------------------
+4. DATOS DE PRUEBA
+---------------------------------------------------------------------
+
+-- Categorias
+INSERT INTO Categoria (NombreCategoria, DescripcionCategoria) VALUES
+('Nutricion',        'Suplementos y proteinas'),
+('Bienestar',        'Productos para el bienestar general'),
+('Control de Peso',  'Productos para manejo del peso');
+
+-- Productos
+INSERT INTO Producto (NombreProducto, DescripcionProducto, ImagenProducto, CostoCompraProducto, PrecioVentaProducto, EstadoProducto) VALUES
+('Shake Chocolate',       'Batido de proteina sabor chocolate 500g',    'shake_chocolate.jpg',  12.00, 28.00, 1),
+('Shake Vainilla',        'Batido de proteina sabor vainilla 500g',     'shake_vainilla.jpg',   12.00, 28.00, 1),
+('Thermojetics',          'Te de hierbas energizante 100g',             'thermojetics.jpg',     8.00,  18.00, 1),
+('Cell Activator',        'Suplemento de micronutrientes 90 capsulas',  'cell_activator.jpg',   15.00, 35.00, 1),
+('Total Control',         'Control de peso y energia 90 tabletas',      'total_control.jpg',    14.00, 32.00, 1),
+('Aloe Vera Concentrate', 'Concentrado de aloe vera 473ml',             'aloe_vera.jpg',        10.00, 24.00, 2);
+
+-- Inventario
+INSERT INTO Inventario (IdProducto, CantidadInventarioProducto, InventarioMinimoProducto) VALUES
+(1, 50, 5), (2, 30, 5), (3, 80, 10), (4, 25, 5), (5, 40, 5), (6, 0, 5);
+
+-- Relaciones Categoria_Producto
+INSERT INTO Categoria_Producto (IdProducto, IdCategoria) VALUES
+(1, 1), (2, 1), (3, 2), (4, 1), (5, 3), (6, 2);
+
+
+---------------------------------------------------------------------
+5. COMO LEVANTAR EL PROYECTO
+---------------------------------------------------------------------
+
+PREREQUISITOS:
+  node -v        (debe tener Node.js instalado)
+  psql --version (debe tener PostgreSQL instalado)
+
+BACKEND (Terminal 1):
+  cd <raiz del proyecto>
+  npm install        <- solo la primera vez
+  node server.js
+  -> Servidor en http://localhost:3000
+
+FRONTEND (Terminal 2):
+  cd Presentation
+  npm install        <- solo la primera vez
+  npm run dev
+  -> App en http://localhost:5173
+
+ORDEN: levantar el backend primero, luego el frontend.
+
+
+---------------------------------------------------------------------
+6. COMO PROBAR LOS ENDPOINTS (backend)
+---------------------------------------------------------------------
+
+Con el servidor corriendo en http://localhost:3000,
+abrir en el navegador o usar un cliente como Postman/Insomnia:
+
+-- Health check
+GET  http://localhost:3000/api/health
+     Respuesta esperada: { "ok": true, "hora": "..." }
+
+-- Catalogo completo
+GET  http://localhost:3000/api/ventas/catalogo
+     Respuesta esperada: { "ok": true, "data": [ lista de productos ] }
+
+-- Buscar por nombre
+GET  http://localhost:3000/api/ventas/catalogo?busqueda=shake
+
+-- Filtrar por categoria (id 1 = Nutricion)
+GET  http://localhost:3000/api/ventas/catalogo?idCategoria=1
+
+-- Ver todas las categorias
+GET  http://localhost:3000/api/ventas/categorias
+
+-- Ver un producto especifico
+GET  http://localhost:3000/api/ventas/productos/1
+
+-- Ver carrito de un cliente
+GET  http://localhost:3000/api/ventas/carrito/1
+
+-- Agregar al carrito
+POST http://localhost:3000/api/ventas/carrito
+     Body (JSON): { "idCliente": 1, "idProducto": 1, "cantidad": 2 }
+
+-- Confirmar pedido
+POST http://localhost:3000/api/ventas/pedidos
+     Body (JSON): { "idCliente": 1, "idCarrito": 1 }
+
+-- Ver pedidos de un cliente
+GET  http://localhost:3000/api/ventas/pedidos/cliente/1
+
+-- Ver pedidos (admin, todos)
+GET  http://localhost:3000/api/ventas/pedidos/admin
+
+-- Ver pedidos por estado (4 = Pendiente)
+GET  http://localhost:3000/api/ventas/pedidos/admin?idEstado=4
+
+-- Ver detalle de un pedido
+GET  http://localhost:3000/api/ventas/pedidos/1
+
+-- Cambiar estado de pedido (Pendiente->Pagado = idEstado 5)
+PATCH http://localhost:3000/api/ventas/pedidos/1/estado
+      Body (JSON): { "idEstado": 5 }
+
+-- Ver productos con stock bajo
+GET  http://localhost:3000/api/ventas/inventario/stock-bajo
+
+
+---------------------------------------------------------------------
+7. ESTADOS DEL PEDIDO (maquina de estados)
+---------------------------------------------------------------------
+  4 = Pendiente  -> puede ir a Pagado (5) o Cancelado (8)
+  5 = Pagado     -> puede ir a Enviado (6) o Cancelado (8)
+  6 = Enviado    -> puede ir a Entregado (7)
+  7 = Entregado  (estado final)
+  8 = Cancelado  (devuelve stock automaticamente)
+
+=====================================================================
