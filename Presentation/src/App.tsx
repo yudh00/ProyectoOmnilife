@@ -1,18 +1,20 @@
+// Presentation/src/App.tsx
 import { useCallback, useState } from "react";
 import "./App.css";
 import CartSidebar from "./components/cart/CartSidebar";
 import FilterBar from "./components/catalog/FilterBar";
 import ProductGrid from "./components/catalog/ProductGrid";
 import ClientTable from "./components/clients/ClientTable";
+import FinancesDashboard from "./components/finances/FinancesDashboard"; 
 import HeroSection from "./components/home/HeroSection";
 import Navbar from "./components/layout/Navbar";
 import Toast from "./components/ui/Toast";
 import type { ToastMessage } from "./components/ui/Toast";
 import { useCart } from "./hooks/useCart";
-import { MOCK_PRODUCTS } from "./types";
+import { useProducts } from "./hooks/useProducts"; 
 import type { Product, ProductCategory } from "./types";
 
-type Page = "home" | "catalog" | "clients";
+type Page = "home" | "catalog" | "clients" | "finances";
 let toastIdCounter = 0;
 
 function App() {
@@ -21,6 +23,10 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<ProductCategory | "Todos">("Todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [confirmingOrder, setConfirmingOrder] = useState(false);
+
+  // Consumo del Hook de productos vinculados a la Base de Datos
+  const { products, loading: loadingProducts, error: errorProducts } = useProducts();
 
   const navigate = useCallback((page: Page) => {
     setCurrentPage(page);
@@ -42,18 +48,26 @@ function App() {
   const handleAddToCart = useCallback(
     (product: Product) => {
       cart.addItem(product);
-      showToast(`"${product.name}" anadido al carrito`);
+      showToast(`"${product.name}" añadido al carrito`);
     },
     [cart, showToast]
   );
 
-  const handleConfirmOrder = useCallback(() => {
-    cart.clearCart();
-    cart.closeCart();
-    showToast("Orden confirmada correctamente.");
+  const handleConfirmOrder = useCallback(async () => {
+    setConfirmingOrder(true);
+    try {
+      const result = await cart.confirmOrder();
+      cart.closeCart();
+      showToast(`Pedido ${result.numeroPedido} confirmado. Total: ₡${result.total.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`);
+    } catch (err: any) {
+      showToast(err.message || 'Error al confirmar el pedido', 'error');
+    } finally {
+      setConfirmingOrder(false);
+    }
   }, [cart, showToast]);
 
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
+  // Filtrado reactivo aplicado sobre el arreglo proveniente del Backend
+  const filteredProducts = products.filter((p) => {
     const matchesCategory =
       activeCategory === "Todos" || p.category === activeCategory;
     const matchesSearch =
@@ -85,6 +99,13 @@ function App() {
               Todos los{" "}
               <span className="text-purple-700">productos</span>
             </h1>
+            
+            {errorProducts && (
+              <div className="p-4 mb-4 bg-red-50 text-red-700 border border-red-100 rounded-xl text-sm">
+                <strong>Error:</strong> {errorProducts}
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <FilterBar
                 activeCategory={activeCategory}
@@ -95,10 +116,17 @@ function App() {
                 {filteredProducts.length !== 1 ? "productos" : "producto"}
               </p>
             </div>
-            <ProductGrid
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-            />
+
+            {loadingProducts ? (
+              <div className="py-20 text-center text-purple-700 font-medium animate-pulse">
+                Cargando catálogo desde el servidor...
+              </div>
+            ) : (
+              <ProductGrid
+                products={filteredProducts}
+                onAddToCart={handleAddToCart}
+              />
+            )}
           </div>
         )}
 
@@ -106,7 +134,7 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="mb-6">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Gestion de{" "}
+                Gestión de{" "}
                 <span className="text-purple-700">Clientes</span>
               </h1>
               <p className="text-sm text-gray-400 mt-1">
@@ -115,6 +143,10 @@ function App() {
             </div>
             <ClientTable />
           </div>
+        )}
+
+        {currentPage === "finances" && (
+          <FinancesDashboard />
         )}
       </main>
 
@@ -126,6 +158,7 @@ function App() {
         onUpdateQuantity={cart.updateQuantity}
         onRemoveItem={cart.removeItem}
         onConfirmOrder={handleConfirmOrder}
+        isConfirming={confirmingOrder}
       />
 
       <Toast toasts={toasts} onRemove={removeToast} />

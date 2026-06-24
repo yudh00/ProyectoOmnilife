@@ -9,6 +9,7 @@ interface CartSidebarProps {
   onUpdateQuantity: (productId: number, quantity: number) => void;
   onRemoveItem: (productId: number) => void;
   onConfirmOrder: () => void;
+  isConfirming?: boolean;
 }
 
 export default function CartSidebar({
@@ -19,6 +20,7 @@ export default function CartSidebar({
   onUpdateQuantity,
   onRemoveItem,
   onConfirmOrder,
+  isConfirming = false,
 }: CartSidebarProps) {
   return (
     <>
@@ -104,10 +106,10 @@ export default function CartSidebar({
           {/* Action buttons */}
           <button
             onClick={onConfirmOrder}
-            disabled={items.length === 0}
+            disabled={items.length === 0 || isConfirming}
             className="w-full py-3 bg-purple-700 text-white font-semibold rounded-xl hover:bg-purple-800 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
           >
-            Confirmar Orden
+            {isConfirming ? 'Procesando...' : 'Confirmar Orden'}
           </button>
           <button
             onClick={onClose}

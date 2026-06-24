@@ -1,17 +1,22 @@
 // =====================================================================
 // SERVER: server.js
 // Servidor Express principal. Punto de entrada del API.
-// Registra todos los modulos (Catalogo y Ventas, y futuros modulos).
 // =====================================================================
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
 
-const express = require('express');
+const express = require('express'); 
+const cors = require('cors'); 
 const db = require('./src/config/db');
-const ventasRoutes = require('./src/ventas/routes/ventas.routes');
+const ventasRoutes   = require('./src/ventas/routes/ventas.routes');
+const clientesRoutes = require('./src/clientes/routes/clientes.routes');
+const financieroRoutes = require('./src/financiero/routes/financiero.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares globales
+// Middlewares globales 
+app.use(cors({ origin: 'http://localhost:5173' })); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -33,6 +38,8 @@ app.get('/api/health', async (req, res) => {
 
 // Registro de modulos
 app.use('/api/ventas', ventasRoutes);
+app.use('/api/clientes', clientesRoutes);
+app.use('/api/financiero', financieroRoutes);
 
 // Handler de rutas no encontradas
 app.use((req, res) => {
@@ -47,8 +54,10 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor Omnilife Store escuchando en puerto ${PORT}`);
-  console.log(`Health: http://localhost:${PORT}/api/health`);
-  console.log(`Catalogo: http://localhost:${PORT}/api/ventas/catalogo`);
+  console.log(`Health:     http://localhost:${PORT}/api/health`);
+  console.log(`Catalogo:  http://localhost:${PORT}/api/ventas/catalogo`);
+  console.log(`Clientes:  http://localhost:${PORT}/api/clientes`);
+  console.log(`Financiero: http://localhost:${PORT}/api/financiero/ingresos?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD`);
 });
 
 // Cierre limpio

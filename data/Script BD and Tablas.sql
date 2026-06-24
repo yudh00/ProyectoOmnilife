@@ -20,14 +20,14 @@ COMMENT ON DATABASE "ProyectoIngeneria"
 
 
 -- Tabla Estado (Debe crearse primero ya que muchas tablas la referencian)
-CREATE TABLE Estado (
+CREATE TABLE IF NOT EXISTS Estado (
     IdEstado SERIAL PRIMARY KEY,
     Estado VARCHAR(50) NOT NULL,
     DescripcionEstado VARCHAR(255)
 );
 
 -- Tabla Usuario
-CREATE TABLE Usuario (
+CREATE TABLE IF NOT EXISTS Usuario (
     IdUsuario SERIAL PRIMARY KEY,
     CorreoElectronico VARCHAR(150) UNIQUE NOT NULL, -- UNIQUE cumple la función de CK (Candidate Key)
     NombreUsuario VARCHAR(100) NOT NULL,
@@ -36,14 +36,14 @@ CREATE TABLE Usuario (
 );
 
 -- Tabla Categoria
-CREATE TABLE Categoria (
+CREATE TABLE IF NOT EXISTS Categoria (
     IdCategoria SERIAL PRIMARY KEY,
     NombreCategoria VARCHAR(100) NOT NULL,
     DescripcionCategoria VARCHAR(255)
 );
 
 -- Tabla MovimientoCaja
-CREATE TABLE MovimientoCaja (
+CREATE TABLE IF NOT EXISTS MovimientoCaja (
     IdMovimiento SERIAL PRIMARY KEY,
     TipoMovimiento BOOLEAN NOT NULL, -- TRUE = Entrada, FALSE = Salida (o viceversa)
     Monto NUMERIC(10,2) NOT NULL,
@@ -56,14 +56,14 @@ CREATE TABLE MovimientoCaja (
 -- ==========================================
 
 -- Tabla Cliente
-CREATE TABLE Cliente (
+CREATE TABLE IF NOT EXISTS Cliente (
     IdCliente SERIAL PRIMARY KEY,
     IsActivo BOOLEAN DEFAULT TRUE,
     NotaAsesoria VARCHAR(255)
 );
 
 -- Tabla Administrador
-CREATE TABLE Administrador (
+CREATE TABLE IF NOT EXISTS Administrador (
     IdAdministrador SERIAL PRIMARY KEY,
     IdUsuario INT NOT NULL,
     FechaIngreso DATE NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE Administrador (
 );
 
 -- Tabla TelefonoUsuario (Llave primaria compuesta por IdUsuario y el Telefono)
-CREATE TABLE TelefonoUsuario (
+CREATE TABLE IF NOT EXISTS TelefonoUsuario (
     IdUsuario INT,
     TelefonoUsuario VARCHAR(20),
     IsActivo BOOLEAN DEFAULT TRUE,
@@ -80,7 +80,7 @@ CREATE TABLE TelefonoUsuario (
 );
 
 -- Tabla Direccion
-CREATE TABLE Direccion (
+CREATE TABLE IF NOT EXISTS Direccion (
     IdDireccion SERIAL PRIMARY KEY,
     IdCliente INT NOT NULL,
     Provincia VARCHAR(50) NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE Direccion (
 );
 
 -- Tabla Producto
-CREATE TABLE Producto (
+CREATE TABLE IF NOT EXISTS Producto (
     IdProducto SERIAL PRIMARY KEY,
     NombreProducto VARCHAR(150) NOT NULL,
     DescripcionProducto VARCHAR(255),
@@ -103,7 +103,7 @@ CREATE TABLE Producto (
 );
 
 -- Tabla Inventario
-CREATE TABLE Inventario (
+CREATE TABLE IF NOT EXISTS Inventario (
     IdProducto INT PRIMARY KEY, -- Relación 1 a 1 o extensión de Producto
     CantidadInventarioProducto INT NOT NULL DEFAULT 0,
     InventarioMinimoProducto INT NOT NULL DEFAULT 0,
@@ -111,7 +111,7 @@ CREATE TABLE Inventario (
 );
 
 -- Tabla Carrito
-CREATE TABLE Carrito (
+CREATE TABLE IF NOT EXISTS Carrito (
     IdCarrito SERIAL PRIMARY KEY,
     IdCliente INT NOT NULL,
     FechaCreacion DATE DEFAULT CURRENT_DATE,
@@ -119,7 +119,7 @@ CREATE TABLE Carrito (
 );
 
 -- Tabla Pedido (Nota: Cambié el atributo "Id" FK por "IdCliente" para que tenga sentido el flujo del negocio)
-CREATE TABLE Pedido (
+CREATE TABLE IF NOT EXISTS Pedido (
     IdPedido SERIAL PRIMARY KEY,
     IdCliente INT NOT NULL, 
     FechaPedido DATE DEFAULT CURRENT_DATE,
@@ -136,7 +136,7 @@ CREATE TABLE Pedido (
 -- ==========================================
 
 -- Tabla Categoria_Producto
-CREATE TABLE Categoria_Producto (
+CREATE TABLE IF NOT EXISTS Categoria_Producto (
     IdProducto INT,
     IdCategoria INT,
     PRIMARY KEY (IdProducto, IdCategoria),
@@ -145,7 +145,7 @@ CREATE TABLE Categoria_Producto (
 );
 
 -- Tabla Carrito_Producto
-CREATE TABLE Carrito_Producto (
+CREATE TABLE IF NOT EXISTS Carrito_Producto (
     IdCarrito INT,
     IdProducto INT,
     Cantidad INT NOT NULL DEFAULT 1,
@@ -156,7 +156,7 @@ CREATE TABLE Carrito_Producto (
 );
 
 -- Tabla LineaDePedido
-CREATE TABLE LineaDePedido (
+CREATE TABLE IF NOT EXISTS LineaDePedido (
     IdPedido INT,
     IdProducto INT,
     Cantidad INT NOT NULL,
