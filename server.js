@@ -1,9 +1,6 @@
-// =====================================================================
 // SERVER: server.js
 // Servidor Express principal. Punto de entrada del API.
-// =====================================================================
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
+// Registra todos los modulos (Catalogo y Ventas, y futuros modulos).
 
 const express = require('express'); 
 const cors = require('cors'); 
@@ -54,7 +51,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor Omnilife Store escuchando en puerto ${PORT}`);
-  console.log(`Health:     http://localhost:${PORT}/api/health`);
+  console.log(`Health:    http://localhost:${PORT}/api/health`);
   console.log(`Catalogo:  http://localhost:${PORT}/api/ventas/catalogo`);
   console.log(`Clientes:  http://localhost:${PORT}/api/clientes`);
   console.log(`Financiero: http://localhost:${PORT}/api/financiero/ingresos?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD`);
