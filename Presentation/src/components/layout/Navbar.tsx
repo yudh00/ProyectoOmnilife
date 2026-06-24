@@ -3,8 +3,8 @@ interface NavbarProps {
   onCartOpen: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  currentPage: "home" | "catalog" | "clients";
-  onNavigate: (page: "home" | "catalog" | "clients") => void;
+  currentPage: "home" | "catalog" | "clients" | "finances";
+  onNavigate: (page: "home" | "catalog" | "clients" | "finances") => void; 
 }
 
 export default function Navbar({
@@ -67,8 +67,8 @@ export default function Navbar({
           </div>
         )}
 
-        {/* Spacer when on home or clients */}
-        {(currentPage === "home" || currentPage === "clients") && <div className="flex-1" />}
+        {/* Spacer when on home, clients, or finances */}
+        {currentPage !== "catalog" && <div className="flex-1" />}
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -137,6 +137,21 @@ export default function Navbar({
                     d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m6-4a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-2 0" />
                 </svg>
                 Clientes
+              </button>
+            </li>
+            {/* Nueva pestaña: Módulo de Finanzas */}
+            <li>
+              <button
+                onClick={() => onNavigate("finances")}
+                className={`flex items-center gap-1.5 px-4 py-3 transition-colors whitespace-nowrap font-medium ${
+                  currentPage === "finances" ? "bg-purple-900" : "hover:bg-purple-800"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Finanzas
               </button>
             </li>
           </ul>

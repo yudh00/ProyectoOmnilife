@@ -2,7 +2,8 @@
 // Servidor Express principal. Punto de entrada del API.
 // Registra todos los modulos (Catalogo y Ventas, y futuros modulos).
 
-const express = require('express');
+const express = require('express'); 
+const cors = require('cors'); 
 const db = require('./src/config/db');
 const ventasRoutes   = require('./src/ventas/routes/ventas.routes');
 const clientesRoutes = require('./src/clientes/routes/clientes.routes');
@@ -11,7 +12,8 @@ const financieroRoutes = require('./src/financiero/routes/financiero.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares globales
+// Middlewares globales 
+app.use(cors({ origin: 'http://localhost:5173' })); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

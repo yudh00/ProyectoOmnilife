@@ -537,20 +537,25 @@ BEGIN
 
     IF v_id_carrito IS NULL THEN
         INSERT INTO Carrito (IdCliente, FechaCreacion)
-        VALUES (p_id_cliente, CURRENT_DATE)
-        RETURNING Carrito.IdCarrito INTO v_id_carrito;
+        VALUES (p_id_cliente, CURRENT_DATE);
+
+        SELECT c.IdCarrito INTO v_id_carrito
+        FROM Carrito c
+        WHERE c.IdCliente = p_id_cliente
+        ORDER BY c.IdCarrito DESC
+        LIMIT 1;
     END IF;
 
     -- Verificar si el producto ya esta en el carrito
     SELECT EXISTS (
-        SELECT 1 FROM Carrito_Producto 
-        WHERE IdCarrito = v_id_carrito AND IdProducto = p_id_producto
+        SELECT 1 FROM Carrito_Producto cp
+        WHERE cp.IdCarrito = v_id_carrito AND cp.IdProducto = p_id_producto
     ) INTO v_existe;
 
     IF v_existe THEN
         UPDATE Carrito_Producto
         SET Cantidad = p_cantidad, IsEliminado = FALSE
-        WHERE IdCarrito = v_id_carrito AND IdProducto = p_id_producto;
+        WHERE Carrito_Producto.IdCarrito = v_id_carrito AND Carrito_Producto.IdProducto = p_id_producto;
     ELSE
         INSERT INTO Carrito_Producto (IdCarrito, IdProducto, Cantidad, IsEliminado)
         VALUES (v_id_carrito, p_id_producto, p_cantidad, FALSE);

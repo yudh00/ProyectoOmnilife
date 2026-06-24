@@ -20,11 +20,23 @@ function manejarError(res, err) {
 async function getCatalogo(req, res) {
   try {
     const { idCategoria, busqueda } = req.query;
-    const productos = await service.listarCatalogo({
+    const productosBase = await service.listarCatalogo({
       idCategoria: idCategoria ? parseInt(idCategoria, 10) : null,
       busqueda: busqueda || null,
     });
-    return res.json({ ok: true, data: productos });
+
+    // Adaptador: columnas que devuelve sp_obtener_catalogo en PostgreSQL (todo lowercase)
+    const productosMapeados = productosBase.map(p => ({
+      id_producto: p.idproducto,
+      nombre: p.nombreproducto,
+      descripcion: p.descripcionproducto,
+      precio: parseFloat(p.precioventaproducto) || 0,
+      imagen_url: p.imagenproducto || null,
+      categoria: p.categorias || 'General',
+      stock: p.stock ?? 0,
+    }));
+
+    return res.json({ ok: true, data: productosMapeados });
   } catch (err) {
     return manejarError(res, err);
   }

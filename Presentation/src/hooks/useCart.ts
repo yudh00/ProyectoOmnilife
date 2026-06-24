@@ -1,5 +1,16 @@
 import { useCallback, useMemo, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 import type { CartItem, Product } from '../types';
+
+// Sin autenticación implementada se usa un cliente de demo.
+// Reemplazar con el id del usuario autenticado cuando haya login.
+const DEMO_CLIENT_ID = 1;
+
+export interface OrderResult {
+  numeroPedido: string;
+  total: number;
+  mensaje: string;
+}
 
 export interface UseCartReturn {
   items: CartItem[];
@@ -12,6 +23,7 @@ export interface UseCartReturn {
   updateQuantity: (productId: number, quantity: number) => void;
   removeItem: (productId: number) => void;
   clearCart: () => void;
+  confirmOrder: () => Promise<OrderResult>;
 }
 
 export function useCart(): UseCartReturn {
@@ -53,6 +65,43 @@ export function useCart(): UseCartReturn {
 
   const clearCart = useCallback(() => setItems([]), []);
 
+  const confirmOrder = useCallback(async (): Promise<OrderResult> => {
+    if (items.length === 0) throw new Error('El carrito está vacío');
+
+    // Sincroniza cada item al carrito en la BD y obtiene el idCarrito
+    let idCarrito: number | null = null;
+    for (const item of items) {
+      const res = await fetch(`${API_BASE_URL}/ventas/carrito`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idCliente: DEMO_CLIENT_ID,
+          idProducto: item.product.id,
+          cantidad: item.quantity,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Error al sincronizar carrito');
+      idCarrito = json.data.idcarrito;
+    }
+
+    // Crea el pedido desde el carrito en la BD
+    const res = await fetch(`${API_BASE_URL}/ventas/pedidos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idCliente: DEMO_CLIENT_ID, idCarrito }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Error al confirmar pedido');
+
+    clearCart();
+    return {
+      numeroPedido: json.data.numeroPedido,
+      total: json.data.total,
+      mensaje: json.data.mensaje,
+    };
+  }, [items, clearCart]);
+
   const totalItems = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
     [items]
@@ -74,5 +123,6 @@ export function useCart(): UseCartReturn {
     updateQuantity,
     removeItem,
     clearCart,
+    confirmOrder,
   };
 }
