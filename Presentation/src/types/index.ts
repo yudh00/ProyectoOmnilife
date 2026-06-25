@@ -2,6 +2,20 @@
 
 export type ProductCategory = 'Nutricional' | 'Cosmético';
 
+// ─── Auth Types ───────────────────────────────────────────────────────────────
+// Roles según tabla Rol en BD: IdRol 1 = Administrador, IdRol 2 = Cliente
+
+export type UserRole = 1 | 2;
+
+export interface AuthUser {
+  idUsuario: number;
+  nombreUsuario: string;
+  apellidosUsuario: string;
+  correoElectronico: string;
+  idRol: UserRole;
+  nombreRol: 'Administrador' | 'Cliente';
+}
+
 // ─── Client Types ─────────────────────────────────────────────────────────────
 
 export interface TransactionItem {

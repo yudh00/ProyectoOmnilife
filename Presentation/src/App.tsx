@@ -13,6 +13,7 @@ import type { ToastMessage } from "./components/ui/Toast";
 import { useCart } from "./hooks/useCart";
 import { useProducts } from "./hooks/useProducts"; 
 import type { Product, ProductCategory } from "./types";
+import AdminGuard from "./guards/AdminGuard";
 
 type Page = "home" | "catalog" | "clients" | "finances";
 let toastIdCounter = 0;
@@ -131,22 +132,26 @@ function App() {
         )}
 
         {currentPage === "clients" && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Gestión de{" "}
-                <span className="text-purple-700">Clientes</span>
-              </h1>
-              <p className="text-sm text-gray-400 mt-1">
-                Administra el directorio de clientes y su historial de compras.
-              </p>
+          <AdminGuard>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                  Gestión de{" "}
+                  <span className="text-purple-700">Clientes</span>
+                </h1>
+                <p className="text-sm text-gray-400 mt-1">
+                  Administra el directorio de clientes y su historial de compras.
+                </p>
+              </div>
+              <ClientTable />
             </div>
-            <ClientTable />
-          </div>
+          </AdminGuard>
         )}
 
         {currentPage === "finances" && (
-          <FinancesDashboard />
+          <AdminGuard>
+            <FinancesDashboard />
+          </AdminGuard>
         )}
       </main>
 
