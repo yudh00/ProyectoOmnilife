@@ -90,6 +90,38 @@ async function actualizarEstadoPedido(idPedido, nuevoIdEstado) {
   return rows[0];
 }
 
+async function obtenerDatosCorreoPedido(idPedido) {
+  const sql = `
+    SELECT
+      u.NombreUsuario    AS nombre_cliente,
+      u.ApellidosUsuario AS apellidos_cliente,
+      u.CorreoElectronico AS correo_cliente,
+      lp.Cantidad        AS cantidad,
+      lp.PrecioCongelado AS precio_unitario,
+      prod.NombreProducto AS nombre_producto
+    FROM Pedido p
+    JOIN Cliente c   ON c.IdCliente = p.IdCliente
+    JOIN Usuario u   ON u.IdUsuario = c.IdUsuario
+    JOIN LineaDePedido lp ON lp.IdPedido = p.IdPedido
+    JOIN Producto prod    ON prod.IdProducto = lp.IdProducto
+    WHERE p.IdPedido = $1
+    ORDER BY prod.NombreProducto
+  `;
+  const { rows } = await db.query(sql, [idPedido]);
+  return rows;
+}
+
+async function obtenerAdminPrincipal() {
+  const sql = `
+    SELECT NombreUsuario, ApellidosUsuario, CorreoElectronico
+    FROM Usuario
+    WHERE IdRol = 1
+    LIMIT 1
+  `;
+  const { rows } = await db.query(sql);
+  return rows[0] || null;
+}
+
 // ---------------------------------------------------------------------
 // INVENTARIO
 // ---------------------------------------------------------------------
@@ -116,6 +148,8 @@ module.exports = {
   listarPedidosAdmin,
   obtenerDetallePedido,
   actualizarEstadoPedido,
+  obtenerDatosCorreoPedido,
+  obtenerAdminPrincipal,
   // Inventario
   obtenerProductosStockBajo,
 };
