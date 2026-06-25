@@ -5,6 +5,7 @@
 // =====================================================================
 
 const repo = require('../repositories/ventas.repository');
+const emailService = require('../../utils/email.service');
 
 // ---------------------------------------------------------------------
 // CATALOGO
@@ -90,7 +91,7 @@ async function confirmarPedido(idCliente, idCarrito, impuestoPct) {
 
   try {
     const resultado = await repo.crearPedido(idCliente, idCarrito, impuestoPct);
-    return {
+    const pedido = {
       idPedido: resultado.idpedidogenerado,
       numeroPedido: resultado.numeropedido,
       subtotal: parseFloat(resultado.subtotal),
@@ -98,6 +99,13 @@ async function confirmarPedido(idCliente, idCarrito, impuestoPct) {
       total: parseFloat(resultado.total),
       mensaje: resultado.mensaje,
     };
+
+    // Enviar correos en background — si falla el correo el pedido ya está creado
+    _enviarCorreosPedido(pedido.idPedido, pedido.numeroPedido, pedido.total).catch((err) =>
+      console.error('[email] Error al enviar correos del pedido:', err)
+    );
+
+    return pedido;
   } catch (err) {
     // El SP lanza excepciones con RAISE EXCEPTION; las re-empaquetamos
     if (err.message.includes('Stock insuficiente') || err.message.includes('carrito esta vacio')) {
@@ -106,6 +114,41 @@ async function confirmarPedido(idCliente, idCarrito, impuestoPct) {
       throw e;
     }
     throw err;
+  }
+}
+
+async function _enviarCorreosPedido(idPedido, numeroPedido, total) {
+  const [filas, admin] = await Promise.all([
+    repo.obtenerDatosCorreoPedido(idPedido),
+    repo.obtenerAdminPrincipal(),
+  ]);
+
+  if (!filas.length) return;
+
+  const primera = filas[0];
+  const items = filas.map((f) => ({
+    nombre: f.nombre_producto,
+    cantidad: f.cantidad,
+    precioUnitario: parseFloat(f.precio_unitario),
+  }));
+
+  await emailService.enviarConfirmacionCliente({
+    correo: primera.correo_cliente,
+    nombre: `${primera.nombre_cliente} ${primera.apellidos_cliente}`,
+    numeroPedido,
+    total,
+    items,
+  });
+
+  if (admin) {
+    await emailService.enviarNotificacionAdmin({
+      correoAdmin: admin.correoelectronico,
+      nombreAdmin: `${admin.nombreusuario} ${admin.apellidosusuario}`,
+      numeroPedido,
+      nombreCliente: `${primera.nombre_cliente} ${primera.apellidos_cliente}`,
+      total,
+      items,
+    });
   }
 }
 
