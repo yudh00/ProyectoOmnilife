@@ -79,11 +79,11 @@ export default function OrdersPage() {
       .map((g) => ({
         ...g,
         orders: [...g.orders].sort(
-          (a, b) => new Date(a.fechaPedido).getTime() - new Date(b.fechaPedido).getTime()
+          (a, b) => new Date(a.fechaPedido + 'T12:00:00').getTime() - new Date(b.fechaPedido + 'T12:00:00').getTime()
         ),
       }))
       .sort(
-        (a, b) => new Date(a.orders[0].fechaPedido).getTime() - new Date(b.orders[0].fechaPedido).getTime()
+        (a, b) => new Date(a.orders[0].fechaPedido + 'T12:00:00').getTime() - new Date(b.orders[0].fechaPedido + 'T12:00:00').getTime()
       );
   }, [orders, filterEstado, filterCliente]);
 
@@ -225,7 +225,7 @@ export default function OrdersPage() {
                       <tr key={order.idPedido} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
                         <td className="px-5 py-3 font-mono text-xs text-gray-500">{order.numeroPedido}</td>
                         <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                          {new Date(order.fechaPedido).toLocaleDateString('es-CR', {
+                          {new Date(order.fechaPedido + 'T12:00:00').toLocaleDateString('es-CR', {
                             day: '2-digit', month: 'short', year: 'numeric',
                           })}
                         </td>
