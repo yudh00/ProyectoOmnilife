@@ -56,7 +56,7 @@ export default function ClientRow({ client, onEdit, onViewHistory, onDelete }: P
 
       {/* Purchases count */}
       <td className="px-4 py-3 text-sm text-center text-gray-600">
-        {client.transactions.length}
+        {client.totalTransactions ?? client.transactions.length}
       </td>
 
       {/* Actions */}
