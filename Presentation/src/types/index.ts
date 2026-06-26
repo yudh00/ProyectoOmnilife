@@ -40,6 +40,10 @@ export interface Client {
   registeredAt: string; // ISO date string
   isActive: boolean;
   transactions: TransactionHistory[];
+  // Total real de pedidos del cliente, calculado por el backend (sp_listar_clientes).
+  // El listado no trae el detalle de cada pedido (eso vive en `transactions`,
+  // que se llena bajo demanda vía GET /api/clientes/:id/historial).
+  totalTransactions?: number;
 }
 
 export interface Product {

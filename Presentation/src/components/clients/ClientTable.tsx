@@ -12,8 +12,17 @@ const PAGE_SIZE = 8;
 let toastId = 0;
 
 export default function ClientTable() {
-  const { filteredClients, searchQuery, setSearchQuery, addClient, updateClient, deleteClient } =
-    useClients();
+  const {
+    filteredClients,
+    searchQuery,
+    setSearchQuery,
+    loading,
+    error,
+    addClient,
+    updateClient,
+    deleteClient,
+    fetchHistorial,
+  } = useClients();
 
   const [editTarget, setEditTarget] = useState<Client | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -45,27 +54,35 @@ export default function ClientTable() {
     setFormOpen(true);
   }
 
-  function handleSave(data: {
+  async function handleSave(data: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
     isActive: boolean;
   }) {
-    if (editTarget) {
-      updateClient(editTarget.id, data);
-      showToast('Cliente editado exitosamente');
-    } else {
-      addClient(data);
-      showToast('Cliente creado exitosamente');
+    try {
+      if (editTarget) {
+        await updateClient(editTarget.id, data);
+        showToast('Cliente editado exitosamente');
+      } else {
+        await addClient(data);
+        showToast('Cliente creado exitosamente');
+      }
+      setFormOpen(false);
+    } catch (err: any) {
+      showToast(err.message || 'No se pudo guardar el cliente', 'error');
     }
-    setFormOpen(false);
   }
 
-  function handleDeleteConfirmed() {
-    if (deleteTarget) {
-      deleteClient(deleteTarget.id);
+  async function handleDeleteConfirmed() {
+    if (!deleteTarget) return;
+    try {
+      await deleteClient(deleteTarget.id);
       showToast('Cliente eliminado exitosamente', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'No se pudo eliminar el cliente', 'error');
+    } finally {
       setDeleteTarget(null);
     }
   }
@@ -106,6 +123,12 @@ export default function ClientTable() {
         </button>
       </div>
 
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 border border-red-100 rounded-xl text-sm">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
       {/* Table card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
@@ -120,7 +143,13 @@ export default function ClientTable() {
               </tr>
             </thead>
             <tbody>
-              {pageClients.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-purple-700 animate-pulse">
+                    Cargando clientes...
+                  </td>
+                </tr>
+              ) : pageClients.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-400">
                     No se encontraron clientes.
@@ -193,6 +222,7 @@ export default function ClientTable() {
       <ClientHistoryModal
         client={historyClient}
         onClose={() => setHistoryClient(null)}
+        fetchHistorial={fetchHistorial}
       />
       <ConfirmDialog
         isOpen={!!deleteTarget}

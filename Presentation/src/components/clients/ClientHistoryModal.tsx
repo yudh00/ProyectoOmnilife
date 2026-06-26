@@ -1,8 +1,10 @@
-import type { Client } from '../../types';
+import { useEffect, useState } from 'react';
+import type { Client, TransactionHistory } from '../../types';
 
 interface Props {
   client: Client | null;
   onClose: () => void;
+  fetchHistorial: (id: number) => Promise<TransactionHistory[]>;
 }
 
 function formatDate(iso: string) {
@@ -19,10 +21,24 @@ function formatCRC(amount: number) {
   return '\u20a1' + amount.toLocaleString('es-CR', { minimumFractionDigits: 2 });
 }
 
-export default function ClientHistoryModal({ client, onClose }: Props) {
+export default function ClientHistoryModal({ client, onClose, fetchHistorial }: Props) {
+  const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!client) return;
+    setLoading(true);
+    setError(null);
+    fetchHistorial(client.id)
+      .then(setTransactions)
+      .catch((err) => setError(err.message || 'No se pudo cargar el historial'))
+      .finally(() => setLoading(false));
+  }, [client, fetchHistorial]);
+
   if (!client) return null;
 
-  const sorted = [...client.transactions].sort(
+  const sorted = [...transactions].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
@@ -54,7 +70,13 @@ export default function ClientHistoryModal({ client, onClose }: Props) {
 
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
-          {sorted.length === 0 ? (
+          {loading ? (
+            <div className="py-12 text-center text-purple-700 text-sm animate-pulse">
+              Cargando historial...
+            </div>
+          ) : error ? (
+            <div className="py-12 text-center text-red-500 text-sm">{error}</div>
+          ) : sorted.length === 0 ? (
             <div className="py-12 text-center text-gray-400 text-sm">
               Este cliente no tiene compras registradas.
             </div>
