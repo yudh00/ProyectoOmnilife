@@ -4,6 +4,13 @@
 
 const repo = require('../repositories/productos.repository');
 
+async function obtenerProducto(idProducto) {
+  if (!idProducto) throw Object.assign(new Error('Id de producto requerido'), { status: 400 });
+  const producto = await repo.obtenerProductoCompleto(idProducto);
+  if (!producto) throw Object.assign(new Error('Producto no encontrado'), { status: 404 });
+  return producto;
+}
+
 async function agregarProducto(datos) {
   const { nombre, costoCompra, precioVenta, idEstado } = datos;
 
@@ -32,4 +39,4 @@ async function eliminarProducto(idProducto) {
   return { mensaje: 'Producto eliminado correctamente' };
 }
 
-module.exports = { agregarProducto, editarProducto, eliminarProducto };
+module.exports = { obtenerProducto, agregarProducto, editarProducto, eliminarProducto };

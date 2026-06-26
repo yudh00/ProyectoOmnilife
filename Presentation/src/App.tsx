@@ -10,8 +10,9 @@ import HeroSection from "./components/home/HeroSection";
 import Navbar from "./components/layout/Navbar";
 import Toast from "./components/ui/Toast";
 import type { ToastMessage } from "./components/ui/Toast";
+import ProductFormModal from "./components/products/ProductFormModal";
 import { useCart } from "./hooks/useCart";
-import { useProducts } from "./hooks/useProducts"; 
+import { useProducts } from "./hooks/useProducts";
 import { useAuth } from "./hooks/useAuth";
 import type { Product, ProductCategory } from "./types";
 import AdminGuard from "./guards/AdminGuard";
@@ -26,12 +27,14 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
 
   // Obtenemos los estados necesarios del contexto
   const { isAuthenticated, isAdmin } = useAuth();
 
   // Obtenemos productos y la función para actualizar stock
-  const { products, loading: loadingProducts, error: errorProducts, updateStock } = useProducts();
+  const { products, loading: loadingProducts, error: errorProducts, updateStock, refreshProducts } = useProducts();
 
   // Efecto de seguridad para vistas protegidas
   useEffect(() => {
@@ -108,10 +111,20 @@ function App() {
 
         {currentPage === "catalog" && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
-              Todos los <span className="text-purple-700">productos</span>
-            </h1>
-            
+            <div className="flex items-center justify-between mb-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                Todos los <span className="text-purple-700">productos</span>
+              </h1>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowProductForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white text-sm font-semibold rounded-xl hover:bg-purple-800 transition-colors"
+                >
+                  <span className="text-lg leading-none">+</span> Agregar producto
+                </button>
+              )}
+            </div>
+
             {errorProducts && (
               <div className="p-4 mb-4 bg-red-50 text-red-700 border border-red-100 rounded-xl text-sm">
                 <strong>Error:</strong> {errorProducts}
@@ -132,9 +145,10 @@ function App() {
             ) : (
               <ProductGrid
                 products={filteredProducts}
-                isAdmin={!!isAdmin} // Convertimos a booleano explícito
+                isAdmin={!!isAdmin}
                 onAddToCart={handleAddToCart}
-                onUpdateStock={handleUpdateStock} // Pasamos la función al grid
+                onUpdateStock={handleUpdateStock}
+                onEdit={(id) => setEditingProductId(id)}
               />
             )}
           </div>
@@ -165,6 +179,16 @@ function App() {
         onRemoveItem={cart.removeItem}
         onConfirmOrder={handleConfirmOrder}
         isConfirming={confirmingOrder}
+      />
+
+      <ProductFormModal
+        isOpen={showProductForm || editingProductId !== null}
+        productId={editingProductId}
+        onClose={() => { setShowProductForm(false); setEditingProductId(null); }}
+        onSaved={() => {
+          showToast(editingProductId ? 'Producto actualizado correctamente' : 'Producto agregado correctamente');
+          refreshProducts();
+        }}
       />
 
       <Toast toasts={toasts} onRemove={removeToast} />

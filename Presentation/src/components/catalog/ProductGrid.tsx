@@ -6,13 +6,15 @@ interface ProductGridProps {
   isAdmin: boolean;
   onAddToCart: (product: Product) => void;
   onUpdateStock: (productId: number, delta: number) => void;
+  onEdit?: (productId: number) => void;
 }
 
-export default function ProductGrid({ 
-  products, 
-  isAdmin, 
-  onAddToCart, 
-  onUpdateStock 
+export default function ProductGrid({
+  products,
+  isAdmin,
+  onAddToCart,
+  onUpdateStock,
+  onEdit,
 }: ProductGridProps) {
   
   if (products.length === 0) {
@@ -32,6 +34,7 @@ export default function ProductGrid({
           isAdmin={isAdmin}
           onAddToCart={onAddToCart}
           onUpdateStock={onUpdateStock}
+          onEdit={onEdit}
         />
       ))}
     </div>

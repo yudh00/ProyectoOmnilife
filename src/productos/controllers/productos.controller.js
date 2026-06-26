@@ -10,6 +10,16 @@ function manejarError(res, err) {
   return res.status(status).json({ ok: false, error: err.message });
 }
 
+async function getProducto(req, res) {
+  try {
+    const idProducto = parseInt(req.params.id, 10);
+    const producto = await service.obtenerProducto(idProducto);
+    return res.json({ ok: true, data: producto });
+  } catch (err) {
+    return manejarError(res, err);
+  }
+}
+
 async function postAgregarProducto(req, res) {
   try {
     const { nombre, descripcion, costoCompra, precioVenta, idEstado, cantidad, minimo, idCategoria } = req.body;
@@ -64,4 +74,4 @@ async function deleteEliminarProducto(req, res) {
   }
 }
 
-module.exports = { postAgregarProducto, putEditarProducto, deleteEliminarProducto };
+module.exports = { getProducto, postAgregarProducto, putEditarProducto, deleteEliminarProducto };

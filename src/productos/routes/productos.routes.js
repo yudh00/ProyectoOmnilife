@@ -9,7 +9,7 @@ const router = express.Router();
 const ctrl = require('../controllers/productos.controller');
 
 const storage = multer.diskStorage({
-  destination: path.resolve(__dirname, '../../../../Presentation/public/images'),
+  destination: path.resolve(__dirname, '../../../Presentation/public/images'),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `producto_${Date.now()}${ext}`);
@@ -24,6 +24,9 @@ const upload = multer({
     else cb(new Error('Solo se permiten imágenes'));
   },
 });
+
+// GET  /api/productos/:id    -> detalle completo para edición
+router.get('/:id', ctrl.getProducto);
 
 // POST /api/productos        -> agregar producto (multipart/form-data)
 router.post('/', upload.single('imagen'), ctrl.postAgregarProducto);

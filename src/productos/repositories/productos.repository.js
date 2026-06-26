@@ -4,6 +4,22 @@
 
 const db = require('../../config/db');
 
+async function obtenerProductoCompleto(idProducto) {
+  const { rows } = await db.query(
+    `SELECT p.IdProducto, p.NombreProducto, p.DescripcionProducto, p.ImagenProducto,
+            p.CostoCompraProducto, p.PrecioVentaProducto, p.EstadoProducto,
+            i.CantidadInventarioProducto, i.InventarioMinimoProducto,
+            cp.IdCategoria
+     FROM Producto p
+     LEFT JOIN Inventario i ON i.IdProducto = p.IdProducto
+     LEFT JOIN Categoria_Producto cp ON cp.IdProducto = p.IdProducto
+     WHERE p.IdProducto = $1
+     LIMIT 1`,
+    [idProducto]
+  );
+  return rows[0] || null;
+}
+
 async function crearProducto({ nombre, descripcion, imagenRuta, costoCompra, precioVenta, idEstado, cantidad, minimo, idCategoria }) {
   const client = await db.connect();
   try {
@@ -69,4 +85,4 @@ async function eliminarProducto(idProducto) {
   return rowCount > 0;
 }
 
-module.exports = { crearProducto, actualizarProducto, eliminarProducto };
+module.exports = { obtenerProductoCompleto, crearProducto, actualizarProducto, eliminarProducto };
