@@ -27,6 +27,7 @@ function mapearUsuarioAutenticado(usuario, token) {
     apellidosUsuario:  usuario.apellidosusuario,
     idRol:             usuario.idrol,
     nombreRol:         usuario.nombrerol,
+    idCliente:         usuario.idcliente ?? null,
     token:             token
   };
 }

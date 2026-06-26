@@ -1,10 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { API_BASE_URL } from '../config/api';
 import type { CartItem, Product } from '../types';
-
-// Sin autenticación implementada se usa un cliente de demo.
-// Reemplazar con el id del usuario autenticado cuando haya login.
-const DEMO_CLIENT_ID = 1;
+import { useAuth } from './useAuth';
 
 export interface OrderResult {
   numeroPedido: string;
@@ -27,6 +24,7 @@ export interface UseCartReturn {
 }
 
 export function useCart(): UseCartReturn {
+  const { currentUser } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -68,6 +66,9 @@ export function useCart(): UseCartReturn {
   const confirmOrder = useCallback(async (): Promise<OrderResult> => {
     if (items.length === 0) throw new Error('El carrito está vacío');
 
+    const idCliente = currentUser?.idCliente;
+    if (!idCliente) throw new Error('Debes iniciar sesión para realizar un pedido');
+
     // Sincroniza cada item al carrito en la BD y obtiene el idCarrito
     let idCarrito: number | null = null;
     for (const item of items) {
@@ -75,7 +76,7 @@ export function useCart(): UseCartReturn {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          idCliente: DEMO_CLIENT_ID,
+          idCliente,
           idProducto: item.product.id,
           cantidad: item.quantity,
         }),
@@ -89,7 +90,7 @@ export function useCart(): UseCartReturn {
     const res = await fetch(`${API_BASE_URL}/ventas/pedidos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idCliente: DEMO_CLIENT_ID, idCarrito }),
+      body: JSON.stringify({ idCliente, idCarrito }),
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || 'Error al confirmar pedido');

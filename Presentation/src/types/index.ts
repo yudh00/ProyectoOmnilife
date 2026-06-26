@@ -14,6 +14,7 @@ export interface AuthUser {
   correoElectronico: string;
   idRol: UserRole;
   nombreRol: 'Administrador' | 'Cliente';
+  idCliente: number | null;
 }
 
 export interface LoginCredentials {

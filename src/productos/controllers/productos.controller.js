@@ -46,7 +46,7 @@ async function postAgregarProducto(req, res) {
 async function putEditarProducto(req, res) {
   try {
     const idProducto = parseInt(req.params.id, 10);
-    const { nombre, descripcion, costoCompra, precioVenta, idEstado } = req.body;
+    const { nombre, descripcion, costoCompra, precioVenta, idEstado, cantidad, minimo } = req.body;
     const imagenRuta = req.file ? `/images/${req.file.filename}` : undefined;
 
     const datos = {};
@@ -56,6 +56,8 @@ async function putEditarProducto(req, res) {
     if (costoCompra !== undefined) datos.costoCompra = parseFloat(costoCompra);
     if (precioVenta !== undefined) datos.precioVenta = parseFloat(precioVenta);
     if (idEstado !== undefined)    datos.idEstado = parseInt(idEstado, 10);
+    if (cantidad !== undefined)    datos.cantidad = parseInt(cantidad, 10);
+    if (minimo !== undefined)      datos.minimo   = parseInt(minimo, 10);
 
     const resultado = await service.editarProducto(idProducto, datos);
     return res.json({ ok: true, data: resultado });
