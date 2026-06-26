@@ -28,6 +28,11 @@ class AppError extends Error {
     return new AppError(message, 400, errores);
   }
 
+  /** 401 Unauthorized — credenciales inválidas o token ausente/expirado */
+  static unauthorized(message = 'Credenciales incorrectas') { // <-- AGREGADO
+    return new AppError(message, 401);
+  }
+
   /** 403 Forbidden — usado por RBAC cuando el módulo de seguridad esté listo */
   static forbidden(message = 'No tiene permisos para realizar esta acción') {
     return new AppError(message, 403);

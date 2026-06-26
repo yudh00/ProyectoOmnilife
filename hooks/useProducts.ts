@@ -1,3 +1,4 @@
+// Presentation/src/hooks/useProducts.ts
 import { useState, useEffect, useCallback } from "react";
 import { API_BASE_URL } from "../config/api";
 import type { Product, ProductCategory } from "../types";
@@ -31,6 +32,7 @@ export function useProducts() {
     try {
       const response = await fetch(`${API_BASE_URL}/ventas/catalogo`);
       if (!response.ok) throw new Error("Error al comunicarse con el servidor");
+
       const data = await response.json();
 
       if (data.ok && Array.isArray(data.data)) {
@@ -44,38 +46,14 @@ export function useProducts() {
           stock: p.stock,
         }));
         setProducts(adaptedProducts);
+      } else {
+        throw new Error(data.error || "Formato de catálogo no válido");
       }
     } catch (err: any) {
+      console.error(err);
       setError(err.message || "Error al cargar el catálogo");
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  const updateStock = useCallback(async (productId: number, delta: number) => {
-    try {
-      // Llamada directa al endpoint PUT definido en ventas.routes.js
-      const response = await fetch(`${API_BASE_URL}/ventas/inventario/${productId}/stock`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ delta })
-      });
-      
-      if (!response.ok) {
-        // Obtenemos el mensaje de error del backend si existe
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "No se pudo actualizar el stock");
-      }
-
-      // Actualización local para reflejar el cambio al instante sin recargar la página
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, stock: Math.max(0, p.stock + delta) } : p
-      ));
-    } catch (err: any) {
-      console.error("Error en updateStock:", err);
-      throw err; // Lanzamos para que App.tsx pueda manejarlo
     }
   }, []);
 
@@ -83,18 +61,5 @@ export function useProducts() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Exportamos con interfaz explícita para corregir errores de TypeScript
-  return { 
-    products, 
-    loading, 
-    error, 
-    refreshProducts: fetchProducts, 
-    updateStock 
-  } as {
-    products: Product[];
-    loading: boolean;
-    error: string | null;
-    refreshProducts: () => Promise<void>;
-    updateStock: (productId: number, delta: number) => Promise<void>;
-  };
+  return { products, loading, error, refreshProducts: fetchProducts };
 }

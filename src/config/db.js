@@ -27,5 +27,6 @@ pool.on('error', (err) => {
 // Función query para usarla en cualquier módulo
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  connect: () => pool.connect(), // <--- Agregamos este helper
   pool,
 };

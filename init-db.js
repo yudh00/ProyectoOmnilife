@@ -3,19 +3,42 @@
 // Automatización e inicialización de la Base de Datos.
 // =====================================================================
 const path = require('path');
-// CRÍTICO: Obliga a dotenv a buscar el archivo .env en la misma raíz que este script
 require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
 
 const fs = require('fs');
 const { Client } = require('pg'); 
+const bcrypt = require('bcrypt'); // Importamos bcrypt
 const db = require('./src/config/db');
 
+async function insertarDatosSemilla() {
+  console.log('\n🌱 Insertando datos semilla (Admin)...');
+  
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  
+  try {
+    // 1. Insertar Admin en Usuario si no existe (buscando por correo para mayor seguridad)
+    await db.query(`
+      INSERT INTO Usuario (IdUsuario, CorreoElectronico, NombreUsuario, ApellidosUsuario, IdRol, Contrasena)
+      SELECT 1, 'admin@omni.com', 'Dylan Admin', 'Solano Pereira', 1, $1
+      WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE IdUsuario = 1);
+    `, [hashedPassword]);
+
+    // 2. Insertar en Administrador solo si el usuario 1 existe
+    await db.query(`
+      INSERT INTO Administrador (IdUsuario, FechaIngreso)
+      SELECT 1, CURRENT_DATE
+      WHERE NOT EXISTS (SELECT 1 FROM Administrador WHERE IdUsuario = 1);
+    `);
+
+    console.log('✅ Administrador semilla generado con seguridad.');
+  } catch (error) {
+    console.error('❌ Error al insertar datos semilla:', error.message);
+    throw error;
+  }
+}
+
 async function inicializarBaseDatos() {
-
-  // Captura el nombre exacto de tu .env (ProyectoIngeneria)
   const dbName = process.env.DB_NAME || 'ProyectoIngeneria';
-
-  // Configuración para conectar temporalmente a la BD base 'postgres'
   const configTemporal = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
@@ -47,22 +70,19 @@ async function inicializarBaseDatos() {
 
     console.log('\n📦 Iniciando estructuración de tablas y funciones...');
 
-    // 2. Ejecutar el script principal de tablas usando tu conexión estándar (db)
+    // Ejecutar script principal
     const scriptTablasPath = path.join(__dirname, 'data', 'Script BD and Tablas.sql');
     if (fs.existsSync(scriptTablasPath)) {
       console.log('📦 Creando tablas base...');
       let sqlTablas = fs.readFileSync(scriptTablasPath, 'utf8');
-      
-      // Limpieza preventiva de comandos CREATE DATABASE dentro del archivo
       sqlTablas = sqlTablas.replace(/CREATE DATABASE[\s\S]*?;/i, '');
-      
       await db.query(sqlTablas);
       console.log('✅ Tablas creadas o verificadas exitosamente.');
     } else {
       throw new Error('No se encontró el archivo "Script BD and Tablas.sql" en data/');
     }
 
-    // 3. Procedimientos Almacenados en orden
+    // Ejecutar Procedimientos
     const archivosSP = [
       '01_sp_catalogo_ventas.sql',
       '02_sp_alteraciones_bd.sql',
@@ -76,13 +96,14 @@ async function inicializarBaseDatos() {
         console.log(`⚙️ Inyectando funciones: ${archivo}...`);
         const sqlSP = fs.readFileSync(spPath, 'utf8');
         await db.query(sqlSP);
-        console.log(`✅ ${archivo} cargado correctamente.`);
       }
     }
 
+    // Insertar datos iniciales (Seed)
+    await insertarDatosSemilla();
+
     console.log(`\n🚀 ¡Todo listo! La base de datos "${dbName}" se ha configurado por completo.`);
     
-    // Si ejecutas init-db de manera independiente, cierra el proceso limpio
     if (require.main === module) {
       process.exit(0);
     }
@@ -94,7 +115,6 @@ async function inicializarBaseDatos() {
   }
 }
 
-// Ejecuta la inicialización de forma directa si se llama por consola
 if (require.main === module) {
   inicializarBaseDatos();
 }

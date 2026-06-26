@@ -1,8 +1,24 @@
+import { useAuth } from '../../hooks/useAuth'; // Ajusta la ruta a tu archivo useAuth
+import { toast } from 'react-hot-toast'; // Asegúrate de tener instalada esta librería
+
 interface HeroSectionProps {
   onNavigateToCatalog: () => void;
 }
 
 export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
+  const { isAuthenticated } = useAuth();
+
+  // Función que decide si permite la navegación o pide login
+  const handleNavigation = () => {
+    if (!isAuthenticated) {
+      toast.error('Por favor, inicia sesión para ver el catálogo');
+      return; // No ejecutamos onNavigateToCatalog
+    }
+    
+    // Si está autenticado, permitimos la navegación
+    onNavigateToCatalog();
+  };
+
   return (
     <div className="flex flex-col">
 
@@ -27,7 +43,7 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
                 por dentro y por fuera.
               </p>
               <button
-                onClick={onNavigateToCatalog}
+                onClick={handleNavigation} // Cambiado para usar el filtro
                 className="mt-8 inline-block bg-purple-800 text-white font-semibold px-8 py-4 rounded-full text-base hover:bg-purple-900 active:scale-95 transition-all shadow-lg shadow-purple-200"
               >
                 Ver productos
@@ -45,15 +61,8 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="absolute top-8 left-4 w-4 h-4 rounded-full bg-orange-400" />
-                <div className="absolute bottom-8 right-4 w-3 h-3 rounded-full bg-purple-400" />
-                <svg className="absolute -top-4 -right-4 w-24 h-24 text-orange-300 opacity-70"
-                  viewBox="0 0 96 96" fill="none">
-                  <circle cx="48" cy="48" r="44" stroke="currentColor" strokeWidth="3" strokeDasharray="8 6" />
-                </svg>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -65,7 +74,7 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <button
-            onClick={onNavigateToCatalog}
+            onClick={handleNavigation} // Cambiado para usar el filtro
             className="group relative rounded-2xl overflow-hidden h-52 shadow-md hover:shadow-xl transition-shadow text-left"
           >
             <img
@@ -77,14 +86,11 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
             <div className="absolute bottom-0 left-0 p-6">
               <span className="text-xs font-semibold text-purple-200 uppercase tracking-wider">OMNILIFE</span>
               <h3 className="text-white text-xl font-bold mt-1">Nutricionales</h3>
-              <p className="text-purple-100 text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                Suplementos, proteinas y mas
-              </p>
             </div>
           </button>
 
           <button
-            onClick={onNavigateToCatalog}
+            onClick={handleNavigation} // Cambiado para usar el filtro
             className="group relative rounded-2xl overflow-hidden h-52 shadow-md hover:shadow-xl transition-shadow text-left"
           >
             <img
@@ -96,9 +102,6 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
             <div className="absolute bottom-0 left-0 p-6">
               <span className="text-xs font-semibold text-purple-200 uppercase tracking-wider">SEYTU</span>
               <h3 className="text-white text-xl font-bold mt-1">Cosmeticos</h3>
-              <p className="text-purple-100 text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                Cremas, tratamientos y mas
-              </p>
             </div>
           </button>
         </div>

@@ -25,7 +25,6 @@ async function getCatalogo(req, res) {
       busqueda: busqueda || null,
     });
 
-    // Adaptador: columnas que devuelve sp_obtener_catalogo en PostgreSQL (todo lowercase)
     const productosMapeados = productosBase.map(p => ({
       id_producto: p.idproducto,
       nombre: p.nombreproducto,
@@ -163,6 +162,18 @@ async function getStockBajo(req, res) {
   }
 }
 
+// NUEVA FUNCION PARA ACTUALIZAR STOCK
+async function patchModificarStock(req, res) {
+  try {
+    const idProducto = parseInt(req.params.idProducto, 10);
+    const { delta } = req.body; 
+    const resultado = await service.modificarStock(idProducto, delta);
+    return res.json({ ok: true, data: resultado });
+  } catch (err) {
+    return manejarError(res, err);
+  }
+}
+
 module.exports = {
   getCatalogo,
   getCategorias,
@@ -176,4 +187,5 @@ module.exports = {
   getDetallePedido,
   patchEstadoPedido,
   getStockBajo,
+  patchModificarStock, // Exportamos la nueva función
 };

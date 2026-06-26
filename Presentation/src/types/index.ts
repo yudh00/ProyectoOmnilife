@@ -16,6 +16,18 @@ export interface AuthUser {
   nombreRol: 'Administrador' | 'Cliente';
 }
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  nombre: string;
+  apellidos: string;
+  email: string;
+  password: string;
+}
+
 // ─── Client Types ─────────────────────────────────────────────────────────────
 
 export interface TransactionItem {

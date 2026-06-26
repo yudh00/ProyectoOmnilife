@@ -1,12 +1,15 @@
 // SERVER: server.js
 // Servidor Express principal. Punto de entrada del API.
-// Registra todos los modulos (Catalogo y Ventas, y futuros modulos).
+// Registra todos los modulos (Catalogo, Ventas, Clientes, Financiero y Autenticación).
 
 const express = require('express'); 
 const cors = require('cors'); 
 const db = require('./src/config/db');
-const ventasRoutes   = require('./src/ventas/routes/ventas.routes');
-const clientesRoutes = require('./src/clientes/routes/clientes.routes');
+
+// IMPORTACIÓN DE RUTAS
+const authRoutes       = require('./src/auth/routes/auth.routes'); // 
+const ventasRoutes     = require('./src/ventas/routes/ventas.routes');
+const clientesRoutes   = require('./src/clientes/routes/clientes.routes');
 const financieroRoutes = require('./src/financiero/routes/financiero.routes');
 
 const app = express();
@@ -33,7 +36,8 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Registro de modulos
+// REGISTRO DE MÓDULOS
+app.use('/api/auth', authRoutes); // 
 app.use('/api/ventas', ventasRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/financiero', financieroRoutes);
@@ -51,9 +55,11 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor Omnilife Store escuchando en puerto ${PORT}`);
-  console.log(`Health:    http://localhost:${PORT}/api/health`);
-  console.log(`Catalogo:  http://localhost:${PORT}/api/ventas/catalogo`);
-  console.log(`Clientes:  http://localhost:${PORT}/api/clientes`);
+  console.log(`Health:     http://localhost:${PORT}/api/health`);
+  console.log(`Auth/Login: http://localhost:${PORT}/api/auth/login`); 
+  console.log(`Auth/Register: http://localhost:${PORT}/api/auth/register`);
+  console.log(`Catalogo:   http://localhost:${PORT}/api/ventas/catalogo`);
+  console.log(`Clientes:   http://localhost:${PORT}/api/clientes`);
   console.log(`Financiero: http://localhost:${PORT}/api/financiero/ingresos?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD`);
 });
 
