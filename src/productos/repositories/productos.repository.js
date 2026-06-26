@@ -55,7 +55,7 @@ async function crearProducto({ nombre, descripcion, imagenRuta, costoCompra, pre
   }
 }
 
-async function actualizarProducto(idProducto, { nombre, descripcion, imagenRuta, costoCompra, precioVenta, idEstado }) {
+async function actualizarProducto(idProducto, { nombre, descripcion, imagenRuta, costoCompra, precioVenta, idEstado, cantidad, minimo }) {
   const campos = [];
   const valores = [];
   let i = 1;
@@ -65,16 +65,31 @@ async function actualizarProducto(idProducto, { nombre, descripcion, imagenRuta,
   if (imagenRuta !== undefined)  { campos.push(`ImagenProducto = $${i++}`);       valores.push(imagenRuta); }
   if (costoCompra !== undefined) { campos.push(`CostoCompraProducto = $${i++}`);  valores.push(costoCompra); }
   if (precioVenta !== undefined) { campos.push(`PrecioVentaProducto = $${i++}`);  valores.push(precioVenta); }
-  if (idEstado !== undefined)    { campos.push(`EstadoProducto = $${i++}`);        valores.push(idEstado); }
+  if (idEstado !== undefined)    { campos.push(`EstadoProducto = $${i++}`);       valores.push(idEstado); }
 
-  if (!campos.length) return null;
+  if (campos.length) {
+    valores.push(idProducto);
+    const { rowCount } = await db.query(
+      `UPDATE Producto SET ${campos.join(', ')} WHERE IdProducto = $${i}`,
+      valores
+    );
+    if (!rowCount) return null;
+  }
 
-  valores.push(idProducto);
-  const { rows } = await db.query(
-    `UPDATE Producto SET ${campos.join(', ')} WHERE IdProducto = $${i} RETURNING *`,
-    valores
-  );
-  return rows[0] || null;
+  if (cantidad !== undefined || minimo !== undefined) {
+    const invCampos = [];
+    const invValores = [];
+    let j = 1;
+    if (cantidad !== undefined) { invCampos.push(`CantidadInventarioProducto = $${j++}`); invValores.push(cantidad); }
+    if (minimo !== undefined)   { invCampos.push(`InventarioMinimoProducto = $${j++}`);   invValores.push(minimo); }
+    invValores.push(idProducto);
+    await db.query(
+      `UPDATE Inventario SET ${invCampos.join(', ')} WHERE IdProducto = $${j}`,
+      invValores
+    );
+  }
+
+  return await obtenerProductoCompleto(idProducto);
 }
 
 async function eliminarProducto(idProducto) {

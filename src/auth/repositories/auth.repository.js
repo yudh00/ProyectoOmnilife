@@ -10,16 +10,18 @@ const db = require('../../config/db');
  */
 async function buscarUsuarioPorCorreo(correo) {
   const queryText = `
-    SELECT 
+    SELECT
       u.IdUsuario,
       u.CorreoElectronico,
       u.NombreUsuario,
       u.ApellidosUsuario,
       u.Contrasena,
       u.IdRol,
-      r.NombreRol
+      r.NombreRol,
+      c.IdCliente
     FROM Usuario u
     INNER JOIN Rol r ON u.IdRol = r.IdRol
+    LEFT JOIN Cliente c ON c.IdUsuario = u.IdUsuario
     WHERE u.CorreoElectronico = $1;
   `;
   
@@ -49,14 +51,23 @@ async function crearUsuarioCliente({ nombre, apellidos, email, contrasenaHash })
     // 2. Insertar en tabla Cliente usando el ID generado
     const queryCliente = `
       INSERT INTO Cliente (IdUsuario, IsActivo, NotaAsesoria)
-      VALUES ($1, TRUE, 'Nuevo cliente registrado desde la App');
+      VALUES ($1, TRUE, 'Nuevo cliente registrado desde la App')
+      RETURNING IdCliente;
     `;
-    await client.query(queryCliente, [idUsuario]);
+    const resCliente = await client.query(queryCliente, [idUsuario]);
+    const idCliente = resCliente.rows[0].idcliente;
 
     await client.query('COMMIT'); // Guardar cambios
 
-    // Retornamos el usuario creado
-    return { id: idUsuario, nombre, apellidos, email }; 
+    return {
+      idusuario:         idUsuario,
+      nombreusuario:     nombre,
+      apellidosusuario:  apellidos,
+      correoelectronico: email,
+      idrol:             2,
+      nombrerol:         'Cliente',
+      idcliente:         idCliente,
+    };
 
   } catch (error) {
     await client.query('ROLLBACK'); // Deshacer si algo falla
