@@ -11,13 +11,14 @@ import Navbar from "./components/layout/Navbar";
 import Toast from "./components/ui/Toast";
 import type { ToastMessage } from "./components/ui/Toast";
 import ProductFormModal from "./components/products/ProductFormModal";
+import OrdersPage from "./components/orders/OrdersPage";
 import { useCart } from "./hooks/useCart";
 import { useProducts } from "./hooks/useProducts";
 import { useAuth } from "./hooks/useAuth";
 import type { Product, ProductCategory } from "./types";
 import AdminGuard from "./guards/AdminGuard";
 
-type Page = "home" | "catalog" | "clients" | "finances";
+type Page = "home" | "catalog" | "clients" | "finances" | "orders";
 let toastIdCounter = 0;
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
 
   // Efecto de seguridad para vistas protegidas
   useEffect(() => {
-    if ((currentPage === "clients" || currentPage === "finances") && (!isAuthenticated || !isAdmin)) {
+    if ((currentPage === "clients" || currentPage === "finances" || currentPage === "orders") && (!isAuthenticated || !isAdmin)) {
       setCurrentPage("home");
     }
   }, [isAuthenticated, isAdmin, currentPage]);
@@ -166,6 +167,12 @@ function App() {
         {currentPage === "finances" && (
           <AdminGuard>
             <FinancesDashboard />
+          </AdminGuard>
+        )}
+
+        {currentPage === "orders" && (
+          <AdminGuard>
+            <OrdersPage />
           </AdminGuard>
         )}
       </main>
