@@ -2,3 +2,4 @@ node_modules/
 .env
 Presentation/.vite/
 TEST/
+presentacion/node_modules/

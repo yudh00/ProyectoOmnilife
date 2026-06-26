@@ -1,5 +1,5 @@
 // Presentation/src/App.tsx
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import "./App.css";
 import CartSidebar from "./components/cart/CartSidebar";
 import FilterBar from "./components/catalog/FilterBar";
@@ -12,6 +12,7 @@ import Toast from "./components/ui/Toast";
 import type { ToastMessage } from "./components/ui/Toast";
 import { useCart } from "./hooks/useCart";
 import { useProducts } from "./hooks/useProducts"; 
+import { useAuth } from "./hooks/useAuth";
 import type { Product, ProductCategory } from "./types";
 import AdminGuard from "./guards/AdminGuard";
 
@@ -26,8 +27,18 @@ function App() {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
 
-  // Consumo del Hook de productos vinculados a la Base de Datos
-  const { products, loading: loadingProducts, error: errorProducts } = useProducts();
+  // Obtenemos los estados necesarios del contexto
+  const { isAuthenticated, isAdmin } = useAuth();
+
+  // Obtenemos productos y la función para actualizar stock
+  const { products, loading: loadingProducts, error: errorProducts, updateStock } = useProducts();
+
+  // Efecto de seguridad para vistas protegidas
+  useEffect(() => {
+    if ((currentPage === "clients" || currentPage === "finances") && (!isAuthenticated || !isAdmin)) {
+      setCurrentPage("home");
+    }
+  }, [isAuthenticated, isAdmin, currentPage]);
 
   const navigate = useCallback((page: Page) => {
     setCurrentPage(page);
@@ -54,6 +65,10 @@ function App() {
     [cart, showToast]
   );
 
+  const handleUpdateStock = useCallback((productId: number, delta: number) => {
+    updateStock(productId, delta);
+  }, [updateStock]);
+
   const handleConfirmOrder = useCallback(async () => {
     setConfirmingOrder(true);
     try {
@@ -67,12 +82,9 @@ function App() {
     }
   }, [cart, showToast]);
 
-  // Filtrado reactivo aplicado sobre el arreglo proveniente del Backend
   const filteredProducts = products.filter((p) => {
-    const matchesCategory =
-      activeCategory === "Todos" || p.category === activeCategory;
-    const matchesSearch =
-      searchQuery.trim() === "" ||
+    const matchesCategory = activeCategory === "Todos" || p.category === activeCategory;
+    const matchesSearch = searchQuery.trim() === "" || 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -97,8 +109,7 @@ function App() {
         {currentPage === "catalog" && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
-              Todos los{" "}
-              <span className="text-purple-700">productos</span>
+              Todos los <span className="text-purple-700">productos</span>
             </h1>
             
             {errorProducts && (
@@ -108,24 +119,22 @@ function App() {
             )}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <FilterBar
-                activeCategory={activeCategory}
-                onCategoryChange={setActiveCategory}
-              />
+              <FilterBar activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
               <p className="text-sm text-gray-400 pb-4 sm:pb-0 flex-shrink-0">
-                {filteredProducts.length}{" "}
-                {filteredProducts.length !== 1 ? "productos" : "producto"}
+                {filteredProducts.length} {filteredProducts.length !== 1 ? "productos" : "producto"}
               </p>
             </div>
 
             {loadingProducts ? (
               <div className="py-20 text-center text-purple-700 font-medium animate-pulse">
-                Cargando catálogo desde el servidor...
+                Cargando catálogo...
               </div>
             ) : (
               <ProductGrid
                 products={filteredProducts}
+                isAdmin={!!isAdmin} // Convertimos a booleano explícito
                 onAddToCart={handleAddToCart}
+                onUpdateStock={handleUpdateStock} // Pasamos la función al grid
               />
             )}
           </div>
@@ -134,15 +143,7 @@ function App() {
         {currentPage === "clients" && (
           <AdminGuard>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="mb-6">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                  Gestión de{" "}
-                  <span className="text-purple-700">Clientes</span>
-                </h1>
-                <p className="text-sm text-gray-400 mt-1">
-                  Administra el directorio de clientes y su historial de compras.
-                </p>
-              </div>
+              <h1 className="text-2xl font-bold text-gray-800">Gestión de Clientes</h1>
               <ClientTable />
             </div>
           </AdminGuard>

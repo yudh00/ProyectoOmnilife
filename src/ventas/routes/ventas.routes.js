@@ -60,4 +60,8 @@ router.patch('/pedidos/:idPedido/estado', ctrl.patchEstadoPedido);
 // GET /api/ventas/inventario/stock-bajo
 router.get('/inventario/stock-bajo', ctrl.getStockBajo);
 
+// PUT /api/ventas/inventario/:idProducto/stock
+// body: { delta: 1 } (incrementar) o { delta: -1 } (decrementar)
+router.put('/inventario/:idProducto/stock', ctrl.patchModificarStock);
+
 module.exports = router;

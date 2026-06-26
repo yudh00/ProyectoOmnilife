@@ -1,26 +1,12 @@
-// ─── AuthContext ──────────────────────────────────────────────────────────────
-// Provee el usuario autenticado y helpers de rol a toda la app.
-//
-// CONTRATO CON EL MÓDULO DE SEGURIDAD (compañero responsable de auth):
-//   - Al hacer login  → guardar en localStorage la clave STORAGE_KEY con el
-//     objeto AuthUser serializado como JSON.
-//   - Al hacer logout → eliminar la clave STORAGE_KEY del localStorage.
-//   - El contexto detecta cambios automáticamente vía StorageEvent.
-//
-// Roles (tabla Rol en BD):
-//   IdRol 1 = Administrador
-//   IdRol 2 = Cliente
-
+// Presentation/src/context/AuthContext.tsx
 import {
   createContext,
-  useContext,
   useState,
   useEffect,
   type ReactNode,
 } from 'react';
 import type { AuthUser } from '../types';
 
-// Clave acordada con el módulo de seguridad para el localStorage
 export const AUTH_STORAGE_KEY = 'omnilife_user';
 
 interface AuthContextType {
@@ -28,6 +14,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isClient: boolean;
+  refreshAuth: () => void;
+  logout: () => void; 
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -44,7 +32,16 @@ function readUserFromStorage(): AuthUser | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(readUserFromStorage);
 
-  // Detecta cuando el módulo de seguridad escribe/borra el usuario en localStorage
+  const refreshAuth = () => {
+    setCurrentUser(readUserFromStorage());
+  };
+
+  // Función explícita para destruir la sesión localmente
+  const logout = () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY); // Cumple el contrato eliminando la clave
+    setCurrentUser(null); // Actualiza el estado inmediatamente en la pestaña actual
+  };
+
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key === AUTH_STORAGE_KEY) {
@@ -60,13 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isAuthenticated = currentUser !== null;
-  // DEV BYPASS: en desarrollo se tratan todas las rutas como admin hasta que
-  // el módulo de Auth esté implementado. En producción usa el rol real.
-  const isAdmin = import.meta.env.DEV ? true : currentUser?.idRol === 1;
-  const isClient = import.meta.env.DEV ? true : currentUser?.idRol === 2;
+  const isAdmin = isAuthenticated && currentUser?.idRol === 1;
+  const isClient = isAuthenticated && currentUser?.idRol === 2;
 
   return (
-    <AuthContext.Provider value={{ currentUser, isAuthenticated, isAdmin, isClient }}>
+    <AuthContext.Provider value={{ currentUser, isAuthenticated, isAdmin, isClient, refreshAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

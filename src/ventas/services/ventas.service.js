@@ -61,7 +61,6 @@ async function agregarAlCarrito(idCliente, idProducto, cantidad) {
   try {
     return await repo.agregarACarrito(idCliente, idProducto, cantidad);
   } catch (err) {
-    // Re-lanzar con mensaje del SP si es por stock
     if (err.message.includes('Stock insuficiente')) {
       const e = new Error(err.message);
       e.status = 409;
@@ -100,14 +99,12 @@ async function confirmarPedido(idCliente, idCarrito, impuestoPct) {
       mensaje: resultado.mensaje,
     };
 
-    // Enviar correos en background — si falla el correo el pedido ya está creado
     _enviarCorreosPedido(pedido.idPedido, pedido.numeroPedido, pedido.total).catch((err) =>
       console.error('[email] Error al enviar correos del pedido:', err)
     );
 
     return pedido;
   } catch (err) {
-    // El SP lanza excepciones con RAISE EXCEPTION; las re-empaquetamos
     if (err.message.includes('Stock insuficiente') || err.message.includes('carrito esta vacio')) {
       const e = new Error(err.message);
       e.status = 409;
@@ -170,7 +167,6 @@ async function verDetallePedido(idPedido) {
     throw err;
   }
 
-  // Como el SP retorna filas por linea, agrupamos en cabecera + lineas
   const primera = filas[0];
   return {
     idPedido: primera.idpedido,
@@ -209,6 +205,24 @@ async function consultarStockBajo() {
   return await repo.obtenerProductosStockBajo();
 }
 
+async function modificarStock(idProducto, delta) {
+  if (!idProducto || !Number.isInteger(Number(idProducto))) {
+    throw new Error('ID de producto inválido');
+  }
+  console.log('Delta recibido:', delta);  
+  console.log('ID de producto:', idProducto);
+  const exito = await repo.actualizarStockProducto(idProducto, delta);
+  
+  if (!exito) {
+    // Si falla, lanzamos un error que el controlador podrá capturar
+    const err = new Error('No se pudo actualizar el stock (producto no encontrado o stock insuficiente)');
+    err.status = 400;
+    throw err;
+  }
+  
+  return { mensaje: 'Stock actualizado correctamente' };
+}
+
 module.exports = {
   listarCatalogo,
   listarCategorias,
@@ -222,4 +236,5 @@ module.exports = {
   verDetallePedido,
   cambiarEstadoPedido,
   consultarStockBajo,
+  modificarStock,
 };

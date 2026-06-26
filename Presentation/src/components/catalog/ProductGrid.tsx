@@ -3,26 +3,21 @@ import ProductCard from './ProductCard';
 
 interface ProductGridProps {
   products: Product[];
+  isAdmin: boolean;
   onAddToCart: (product: Product) => void;
+  onUpdateStock: (productId: number, delta: number) => void;
 }
 
-export default function ProductGrid({ products, onAddToCart }: ProductGridProps) {
+export default function ProductGrid({ 
+  products, 
+  isAdmin, 
+  onAddToCart, 
+  onUpdateStock 
+}: ProductGridProps) {
+  
   if (products.length === 0) {
     return (
       <div className="py-20 text-center text-gray-400">
-        <svg
-          className="w-12 h-12 mx-auto mb-3 opacity-40"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-          />
-        </svg>
         <p className="text-sm">No se encontraron productos.</p>
       </div>
     );
@@ -34,7 +29,9 @@ export default function ProductGrid({ products, onAddToCart }: ProductGridProps)
         <ProductCard
           key={product.id}
           product={product}
+          isAdmin={isAdmin}
           onAddToCart={onAddToCart}
+          onUpdateStock={onUpdateStock}
         />
       ))}
     </div>

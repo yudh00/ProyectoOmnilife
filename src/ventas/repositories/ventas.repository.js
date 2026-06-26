@@ -132,6 +132,28 @@ async function obtenerProductosStockBajo() {
   return rows;
 }
 
+// NUEVA FUNCION PARA ACTUALIZAR STOCK EN BD
+async function actualizarStockProducto(idProducto, delta) {
+  // Realizamos el UPDATE directamente con SQL puro.
+  // La condición (Stock + $1) >= 0 asegura que no el stock no baje de cero.
+  const sql = `
+    UPDATE Inventario 
+    SET CantidadInventarioProducto = CantidadInventarioProducto + $1 
+    WHERE IdProducto = $2 
+    AND (CantidadInventarioProducto + $1) >= 0
+    RETURNING CantidadInventarioProducto;
+  `;
+  
+  try {
+    const { rowCount } = await db.query(sql, [delta, idProducto]);
+    // Si rowCount es > 0, significa que se actualizó el registro exitosamente
+    return rowCount > 0;
+  } catch (err) {
+    console.error("Error en BD al actualizar stock:", err);
+    return false;
+  }
+}
+
 module.exports = {
   // Catalogo
   obtenerCatalogo,
@@ -152,4 +174,5 @@ module.exports = {
   obtenerAdminPrincipal,
   // Inventario
   obtenerProductosStockBajo,
+  actualizarStockProducto,
 };
