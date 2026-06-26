@@ -7,10 +7,11 @@ const cors = require('cors');
 const db = require('./src/config/db');
 
 // IMPORTACIÓN DE RUTAS
-const authRoutes       = require('./src/auth/routes/auth.routes'); // 
+const authRoutes       = require('./src/auth/routes/auth.routes');
 const ventasRoutes     = require('./src/ventas/routes/ventas.routes');
 const clientesRoutes   = require('./src/clientes/routes/clientes.routes');
 const financieroRoutes = require('./src/financiero/routes/financiero.routes');
+const productosRoutes  = require('./src/productos/routes/productos.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,10 +38,11 @@ app.get('/api/health', async (req, res) => {
 });
 
 // REGISTRO DE MÓDULOS
-app.use('/api/auth', authRoutes); // 
+app.use('/api/auth', authRoutes);
 app.use('/api/ventas', ventasRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/financiero', financieroRoutes);
+app.use('/api/productos', productosRoutes);
 
 // Handler de rutas no encontradas
 app.use((req, res) => {
