@@ -174,6 +174,20 @@ async function patchModificarStock(req, res) {
   }
 }
 
+async function postRetornarStock(req, res) {
+  try {
+    const idProducto = parseInt(req.params.idProducto, 10);
+    const { cantidad } = req.body;
+    const resultado = await service.retornarStock(idProducto, cantidad);
+    if (!resultado.ok) {
+      return res.status(400).json({ ok: false, error: resultado.error });
+    }
+    return res.json({ ok: true, data: resultado });
+  } catch (err) {
+    return manejarError(res, err);
+  }
+}
+
 async function getEstadosPedido(req, res) {
   try {
     const estados = await service.listarEstadosPedido();
@@ -197,5 +211,6 @@ module.exports = {
   patchEstadoPedido,
   getStockBajo,
   patchModificarStock,
+  postRetornarStock,
   getEstadosPedido,
 };

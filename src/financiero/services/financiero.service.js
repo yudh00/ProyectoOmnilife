@@ -120,7 +120,7 @@ function crearServicioFinanciero(repo) {
     return {
       idProducto: fila.idproducto,
       nombreProducto: fila.nombreproducto,
-      precioVenta: parseFloat(fila.precioventaproducto),
+      precioVenta: parseFloat(fila.precioventa),
       costoAdquisicion: parseFloat(fila.costoadquisicion),
       rentabilidadUnitaria: parseFloat(fila.rentabilidadunitaria),
       margenPorcentual: parseFloat(fila.margenporcentual),

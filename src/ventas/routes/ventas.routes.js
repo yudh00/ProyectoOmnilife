@@ -67,4 +67,8 @@ router.get('/inventario/stock-bajo', ctrl.getStockBajo);
 // body: { delta: 1 } (incrementar) o { delta: -1 } (decrementar)
 router.put('/inventario/:idProducto/stock', ctrl.patchModificarStock);
 
+// POST /api/ventas/inventario/:idProducto/retorno
+// body: { cantidad: N } — retorna N unidades al proveedor, descuenta stock y finanzas
+router.post('/inventario/:idProducto/retorno', ctrl.postRetornarStock);
+
 module.exports = router;

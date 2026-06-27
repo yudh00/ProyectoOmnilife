@@ -46,8 +46,8 @@ export function useFinances() {
     try {
       // 1. Obtener flujo de caja y estadísticas en paralelo
       const [resFlujo, resEstadisticas, resCatalogo] = await Promise.all([
-        fetch(`${API_BASE_URL}/financiero/flujo?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
-        fetch(`${API_BASE_URL}/financiero/estadisticas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+        fetch(`${API_BASE_URL}/financiero/flujo?fechaInicio=${fechaInicio}&fechaFin=${new Date(new Date(fechaFin).getTime() + 86400000).toISOString().split('T')[0]}`),
+        fetch(`${API_BASE_URL}/financiero/estadisticas?fechaInicio=${fechaInicio}&fechaFin=${new Date(new Date(fechaFin).getTime() + 86400000).toISOString().split('T')[0]}`),
         fetch(`${API_BASE_URL}/ventas/catalogo`),
       ]);
 
@@ -97,10 +97,10 @@ export function useFinances() {
                   id: p.id_producto,
                   nombre: p.nombre,
                   categoria: catParsed as 'Nutricional' | 'Cosmético',
-                  costo: parseFloat(r.costoAdquisicion || r.costoadquisicion || 0),
-                  precioVenta: parseFloat(r.precioVenta || r.precioventaproducto || 0),
-                  gananciaNeta: parseFloat(r.rentabilidadUnitaria || r.rentabilidadunitaria || 0),
-                  margenPorcentaje: parseFloat(r.margenPorcentual || r.margenporcentual || 0),
+                  costo: parseFloat(r.costoAdquisicion ?? r.costoadquisicion ?? 0),
+                  precioVenta: parseFloat(r.precioVenta ?? r.precioventa ?? 0),
+                  gananciaNeta: parseFloat(r.rentabilidadUnitaria ?? r.rentabilidadunitaria ?? 0),
+                  margenPorcentaje: parseFloat(r.margenPorcentual ?? r.margenporcentual ?? 0),
                 };
               }
             }
@@ -122,4 +122,4 @@ export function useFinances() {
   }, []);
 
   return { summary, productProfitability, loading, error, fetchFinances };
-}
+}
