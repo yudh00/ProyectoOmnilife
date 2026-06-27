@@ -26,15 +26,15 @@ async function login(req, res) {
  */
 async function register(req, res) {
   try {
-    // La GUI envía los datos del nuevo cliente: { nombre, apellidos, email, password }
-    const { nombre, apellidos, email, password } = req.body;
+    // La GUI envía los datos del nuevo cliente: { nombre, apellidos, email, password, telefono }
+    const { nombre, apellidos, email, password, telefono } = req.body;
 
     // Validación básica en capa HTTP para asegurar la integridad de la petición
-    if (!nombre || !apellidos || !email || !password) {
+    if (!nombre || !apellidos || !email || !password || !telefono) {
       return fail(res, { message: 'Todos los campos son requeridos', status: 400 });
     }
 
-    const newUserAuthData = await service.registerClient({ nombre, apellidos, email, password });
+    const newUserAuthData = await service.registerClient({ nombre, apellidos, email, password, telefono });
 
     // Retorna el DTO AuthUser con estatus de éxito
     return ok(res, newUserAuthData);

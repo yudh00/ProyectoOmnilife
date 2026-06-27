@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { authApiService } from '../../services/auth';
+import { useAuth } from '../../hooks/useAuth';
+import { AUTH_STORAGE_KEY } from '../../context/AuthContext';
 
 interface Props {
   isOpen: boolean;
@@ -13,6 +15,7 @@ type RegisterFormData = {
   email: string;
   password: string;
   confirmPassword: string;
+  telefono: string;
 };
 
 const EMPTY_FORM: RegisterFormData = {
@@ -21,17 +24,23 @@ const EMPTY_FORM: RegisterFormData = {
   email: '',
   password: '',
   confirmPassword: '',
+  telefono: '',
 };
 
+const PHONE_REGEX = /^\d{8}$/;
+
 export default function RegisterFormModal({ isOpen, onClose, onSwitchToLogin }: Props) {
+  const { refreshAuth } = useAuth();
   const [form, setForm] = useState<RegisterFormData>(EMPTY_FORM);
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setForm(EMPTY_FORM);
       setErrors({});
+      setSuccess(false);
     }
   }, [isOpen]);
 
@@ -44,6 +53,7 @@ export default function RegisterFormModal({ isOpen, onClose, onSwitchToLogin }: 
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Correo inválido';
     if (form.password.length < 6) e.password = 'Debe tener al menos 6 caracteres';
     if (form.password !== form.confirmPassword) e.confirmPassword = 'Las contraseñas no coinciden';
+    if (!PHONE_REGEX.test(form.telefono.trim())) e.telefono = 'Debe tener exactamente 8 dígitos';
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -59,13 +69,14 @@ export default function RegisterFormModal({ isOpen, onClose, onSwitchToLogin }: 
         nombre: form.nombre,
         apellidos: form.apellidos,
         email: form.email,
-        password: form.password
+        password: form.password,
+        telefono: form.telefono.trim(),
       });
 
-      localStorage.setItem('user', JSON.stringify(newUser));
-      alert('¡Registro exitoso!');
-      onClose();
-      window.location.reload(); 
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
+      refreshAuth();
+      setSuccess(true);
+      setTimeout(() => onClose(), 1200);
     } catch (err: any) {
       setErrors(prev => ({ ...prev, email: err.message || 'Error al registrar' }));
     } finally {
@@ -123,6 +134,20 @@ export default function RegisterFormModal({ isOpen, onClose, onSwitchToLogin }: 
             {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
           </div>
 
+          {/* Teléfono */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-500">Teléfono</label>
+            <input
+              type="tel"
+              value={form.telefono}
+              onChange={(e) => setForm(p => ({ ...p, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
+              placeholder="8 dígitos"
+              maxLength={8}
+              className={`px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 ${errors.telefono ? 'border-red-400' : 'border-gray-200'}`}
+            />
+            {errors.telefono && <p className="text-xs text-red-500">{errors.telefono}</p>}
+          </div>
+
           {/* Password */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-500">Contraseña</label>
@@ -149,10 +174,16 @@ export default function RegisterFormModal({ isOpen, onClose, onSwitchToLogin }: 
             {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword}</p>}
           </div>
 
+          {success && (
+            <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200 font-medium text-center">
+              ¡Registro exitoso! Iniciando sesión...
+            </div>
+          )}
+
           <div className="pt-2 flex flex-col gap-3 border-t border-gray-100 mt-4">
-            <button 
-              type="submit" 
-              disabled={loading}
+            <button
+              type="submit"
+              disabled={loading || success}
               className="w-full py-2 bg-purple-700 text-white rounded-xl text-sm font-semibold hover:bg-purple-800 transition-colors disabled:opacity-50"
             >
               {loading ? 'Registrando...' : 'Registrarme'}
