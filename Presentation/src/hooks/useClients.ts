@@ -55,30 +55,6 @@ export function useClients() {
     return data.data as TransactionHistory[];
   }, []);
 
-  // POST: Crear cliente — el controller espera firstName/lastName/email/phone
-  const addClient = useCallback(async (clientData: ClientFormData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/clientes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: clientData.firstName,
-          lastName: clientData.lastName,
-          email: clientData.email,
-          phone: clientData.phone,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || "Error al insertar");
-
-      await fetchClients();
-    } catch (err) {
-      console.error("Error en addClient:", err);
-      throw err;
-    }
-  }, [fetchClients]);
-
   // PUT: Actualizar cliente — mismo contrato camelCase que espera el controller
   const updateClient = useCallback(async (id: number, clientData: ClientFormData) => {
     try {
@@ -144,7 +120,6 @@ export function useClients() {
     setSearchQuery,
     loading,
     error,
-    addClient,
     updateClient,
     deleteClient,
     fetchHistorial,

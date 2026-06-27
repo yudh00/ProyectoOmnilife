@@ -21,6 +21,17 @@ function formatCRC(amount: number) {
   return '\u20a1' + amount.toLocaleString('es-CR', { minimumFractionDigits: 2 });
 }
 
+function estadoBadgeClasses(estado: string) {
+  switch (estado) {
+    case 'Entregado':
+      return 'text-green-700 bg-green-50';
+    case 'Enviado':
+      return 'text-blue-700 bg-blue-50';
+    default: // Pagado
+      return 'text-purple-600 bg-purple-50';
+  }
+}
+
 export default function ClientHistoryModal({ client, onClose, fetchHistorial }: Props) {
   const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
   const [loading, setLoading] = useState(false);
@@ -84,9 +95,14 @@ export default function ClientHistoryModal({ client, onClose, fetchHistorial }: 
             sorted.map((tx) => (
               <div key={tx.id} className="border border-gray-100 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                    Orden #{tx.id}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                      Orden #{tx.id}
+                    </span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${estadoBadgeClasses(tx.estado)}`}>
+                      {tx.estado}
+                    </span>
+                  </div>
                   <span className="text-xs text-gray-400">{formatDate(tx.date)}</span>
                 </div>
                 <table className="w-full text-sm">

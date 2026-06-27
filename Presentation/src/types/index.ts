@@ -40,6 +40,7 @@ export interface TransactionItem {
 export interface TransactionHistory {
   id: number;
   date: string; // ISO date string
+  estado: string; // Pagado | Enviado | Entregado (sp_obtener_historial_cliente ya filtra el resto)
   items: TransactionItem[];
   total: number;
 }
@@ -127,6 +128,7 @@ export const MOCK_CLIENTS: Client[] = [
       {
         id: 101,
         date: '2026-05-28T14:30:00Z',
+        estado: 'Entregado',
         items: [
           { productName: 'Uzo Evolución', quantity: 2, unitPrice: 1320.0 },
           { productName: 'Vitalité Crema Facial', quantity: 1, unitPrice: 870.0 },
@@ -136,6 +138,7 @@ export const MOCK_CLIENTS: Client[] = [
       {
         id: 102,
         date: '2026-04-15T10:00:00Z',
+        estado: 'Entregado',
         items: [
           { productName: 'OmniProtein Chocolate', quantity: 1, unitPrice: 1560.0 },
         ],
@@ -155,6 +158,7 @@ export const MOCK_CLIENTS: Client[] = [
       {
         id: 201,
         date: '2026-06-01T16:45:00Z',
+        estado: 'Pagado',
         items: [
           { productName: 'Vitalité Crema Facial', quantity: 3, unitPrice: 870.0 },
         ],

@@ -379,7 +379,7 @@ BEGIN
     FROM Pedido p
     INNER JOIN Estado e ON p.EstadoPedido = e.IdEstado
     INNER JOIN Cliente c ON p.IdCliente = c.IdCliente
-    LEFT JOIN Usuario u ON c.IdCliente = u.IdUsuario
+    LEFT JOIN Usuario u ON c.IdUsuario = u.IdUsuario
     WHERE (p_id_estado IS NULL OR p.EstadoPedido = p_id_estado)
     ORDER BY p.FechaPedido DESC, p.IdPedido DESC;
 END;

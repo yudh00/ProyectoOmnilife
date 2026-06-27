@@ -55,4 +55,9 @@ FRONTEND (Terminal 2):
   npm run dev
   -> App en http://localhost:5173
 
-ORDEN: levantar el backend primero, luego el frontend.
+
+  Dependencias a Instalar 
+  npm install react-hot-toast
+  npm install bcryptjs
+
+ORDEN: levantar el backend primero, luego el frontend.  
