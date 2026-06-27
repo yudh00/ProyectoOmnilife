@@ -14,9 +14,49 @@
 
 
 -- =====================================================================
--- 1.b TRIGGER: registrar egreso de cancelación de pedido
---    Mantiene el comportamiento original de los SP y añade el registro
---    financiero en MovimientoCaja cuando un pedido cambia a 'Cancelado'.
+-- 1.a TRIGGER: registrar INGRESO cuando un pedido pasa a 'Pagado'
+--    Inserta en MovimientoCaja al momento del pago para que el ingreso
+--    quede persistido aunque el pedido avance a Enviado o Entregado.
+-- =====================================================================
+CREATE OR REPLACE FUNCTION trg_registrar_ingreso_pago_pedido()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_estado_pagado INT;
+    v_numero_pedido VARCHAR;
+BEGIN
+    IF TG_OP = 'UPDATE' AND NEW.EstadoPedido <> OLD.EstadoPedido THEN
+        SELECT IdEstado INTO v_estado_pagado FROM Estado WHERE Estado = 'Pagado';
+
+        IF v_estado_pagado IS NOT NULL AND NEW.EstadoPedido = v_estado_pagado THEN
+            v_numero_pedido := 'PED-' || EXTRACT(YEAR FROM COALESCE(NEW.FechaPedido, CURRENT_DATE)) || '-' || LPAD(NEW.IdPedido::TEXT, 6, '0');
+
+            INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
+            VALUES (
+                TRUE,
+                NEW.Total,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE,
+                'Pedido ' || v_numero_pedido || ' - Pago confirmado'
+            );
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS pedido_pagado_movimiento_caja ON Pedido;
+
+CREATE TRIGGER pedido_pagado_movimiento_caja
+AFTER UPDATE OF EstadoPedido ON Pedido
+FOR EACH ROW
+WHEN (OLD.EstadoPedido IS DISTINCT FROM NEW.EstadoPedido)
+EXECUTE FUNCTION trg_registrar_ingreso_pago_pedido();
+
+
+-- =====================================================================
+-- 1.b TRIGGER: registrar EGRESO cuando un pedido se cancela
 -- =====================================================================
 CREATE OR REPLACE FUNCTION trg_registrar_egreso_cancelacion_pedido()
 RETURNS TRIGGER
@@ -77,15 +117,14 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
-        COALESCE(SUM(p.Total), 0::NUMERIC) AS TotalIngresos,
-        COUNT(p.IdPedido)::INT AS CantidadPedidosPagados,
+    SELECT
+        COALESCE(SUM(mc.Monto), 0::NUMERIC) AS TotalIngresos,
+        COUNT(mc.IdMovimiento)::INT          AS CantidadPedidosPagados,
         p_fecha_inicio,
         p_fecha_fin
-    FROM Pedido p
-    INNER JOIN Estado e ON p.EstadoPedido = e.IdEstado
-    WHERE e.Estado = 'Pagado'
-        AND p.FechaPedido BETWEEN p_fecha_inicio AND p_fecha_fin
+    FROM MovimientoCaja mc
+    WHERE mc.TipoMovimiento = TRUE
+        AND mc.Fecha BETWEEN p_fecha_inicio AND p_fecha_fin
     GROUP BY p_fecha_inicio, p_fecha_fin;
 END;
 $$;
@@ -210,28 +249,13 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        COALESCE(SUM(CASE WHEN tipo_mov = TRUE THEN monto ELSE 0 END), 0::NUMERIC) AS TotalIngresos,
-        COALESCE(SUM(CASE WHEN tipo_mov = FALSE THEN monto ELSE 0 END), 0::NUMERIC) AS TotalEgresos,
-        COALESCE(SUM(CASE WHEN tipo_mov = TRUE THEN monto ELSE -monto END), 0::NUMERIC) AS FlujoCajaNeto,
-        COUNT(CASE WHEN tipo_mov = TRUE THEN 1 END)::INT AS CantidadIngresos,
-        COUNT(CASE WHEN tipo_mov = FALSE THEN 1 END)::INT AS CantidadEgresos
-    FROM (
-        SELECT 
-            TRUE AS tipo_mov,
-            p.Total AS monto
-        FROM Pedido p
-        INNER JOIN Estado e ON p.EstadoPedido = e.IdEstado
-        WHERE e.Estado = 'Pagado'
-            AND p.FechaPedido BETWEEN p_fecha_inicio AND p_fecha_fin
-
-        UNION ALL
-
-        SELECT 
-            mc.TipoMovimiento AS tipo_mov,
-            mc.Monto AS monto
-        FROM MovimientoCaja mc
-        WHERE mc.Fecha BETWEEN p_fecha_inicio AND p_fecha_fin
-    ) flujo_consolidado;
+        COALESCE(SUM(CASE WHEN mc.TipoMovimiento = TRUE  THEN mc.Monto ELSE 0 END), 0::NUMERIC) AS TotalIngresos,
+        COALESCE(SUM(CASE WHEN mc.TipoMovimiento = FALSE THEN mc.Monto ELSE 0 END), 0::NUMERIC) AS TotalEgresos,
+        COALESCE(SUM(CASE WHEN mc.TipoMovimiento = TRUE  THEN mc.Monto ELSE -mc.Monto END), 0::NUMERIC) AS FlujoCajaNeto,
+        COUNT(CASE WHEN mc.TipoMovimiento = TRUE  THEN 1 END)::INT AS CantidadIngresos,
+        COUNT(CASE WHEN mc.TipoMovimiento = FALSE THEN 1 END)::INT AS CantidadEgresos
+    FROM MovimientoCaja mc
+    WHERE mc.Fecha BETWEEN p_fecha_inicio AND p_fecha_fin;
 END;
 $$;
 
@@ -274,13 +298,13 @@ DECLARE
     v_margen_promedio NUMERIC;
     v_dias_medidos INT;
 BEGIN
-    -- Total de ingresos (pedidos pagados)
-    SELECT COALESCE(SUM(p.Total), 0::NUMERIC), COUNT(p.IdPedido)
+    -- Total de ingresos (leído de MovimientoCaja para que no desaparezca
+    -- cuando el pedido avanza a Enviado o Entregado)
+    SELECT COALESCE(SUM(mc.Monto), 0::NUMERIC), COUNT(mc.IdMovimiento)
     INTO v_total_ingresos, v_pedidos_pagados
-    FROM Pedido p
-    INNER JOIN Estado e ON p.EstadoPedido = e.IdEstado
-    WHERE e.Estado = 'Pagado'
-        AND p.FechaPedido BETWEEN p_fecha_inicio AND p_fecha_fin;
+    FROM MovimientoCaja mc
+    WHERE mc.TipoMovimiento = TRUE
+        AND mc.Fecha BETWEEN p_fecha_inicio AND p_fecha_fin;
 
     -- Total de egresos
     SELECT COALESCE(SUM(mc.Monto), 0::NUMERIC)
