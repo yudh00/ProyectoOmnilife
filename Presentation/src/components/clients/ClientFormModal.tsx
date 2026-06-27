@@ -11,38 +11,32 @@ type FormData = {
 };
 
 interface Props {
-  client: Client | null;   // null = create mode
+  client: Client;
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: FormData) => void;
 }
 
-const EMPTY: FormData = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  isActive: true,
-};
-
 export default function ClientFormModal({ client, isOpen, onClose, onSave }: Props) {
-  const [form, setForm] = useState<FormData>(EMPTY);
+  const [form, setForm] = useState<FormData>({
+    firstName: client.firstName,
+    lastName: client.lastName,
+    email: client.email,
+    phone: client.phone,
+    isActive: client.isActive,
+  });
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
   useEffect(() => {
     if (isOpen) {
-      setForm(
-        client
-          ? {
-              firstName: client.firstName,
-              lastName: client.lastName,
-              email: client.email,
-              phone: client.phone,
-              isActive: client.isActive,
-            }
-          : EMPTY
-      );
+      setForm({
+        firstName: client.firstName,
+        lastName: client.lastName,
+        email: client.email,
+        phone: client.phone,
+        isActive: client.isActive,
+      });
       setErrors({});
     }
   }, [isOpen, client]);
@@ -62,11 +56,7 @@ export default function ClientFormModal({ client, isOpen, onClose, onSave }: Pro
 
   function handleSubmit() {
     if (!validate()) return;
-    if (client) {
-      setShowConfirm(true);
-    } else {
-      onSave(form);
-    }
+    setShowConfirm(true);
   }
 
   function handleConfirmed() {
@@ -85,7 +75,7 @@ export default function ClientFormModal({ client, isOpen, onClose, onSave }: Pro
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h2 className="font-bold text-gray-800 text-lg">
-              {client ? 'Editar cliente' : 'Nuevo cliente'}
+              Editar cliente
             </h2>
             <button
               onClick={onClose}

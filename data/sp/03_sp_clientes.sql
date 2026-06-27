@@ -294,6 +294,9 @@ $$;
 -- 6. sp_obtener_historial_cliente
 --    Devuelve los pedidos del cliente con sus líneas de detalle.
 --    Ordenado más reciente primero (RF-06).
+--    Solo incluye pedidos que ya fueron confirmados (Pagado en adelante:
+--    Pagado, Enviado, Entregado). Un pedido Pendiente aún no es una compra
+--    real, y uno Cancelado se revirtió — ninguno cuenta como historial.
 --    Índice idx_pedido_cliente cubre esta consulta para cumplir < 2 s (§7).
 -- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION sp_obtener_historial_cliente(
@@ -331,6 +334,7 @@ BEGIN
     LEFT  JOIN LineaDePedido lp ON p.IdPedido       = lp.IdPedido
     LEFT  JOIN Producto      pr ON lp.IdProducto    = pr.IdProducto
     WHERE p.IdCliente = p_id_cliente
+      AND e.Estado IN ('Pagado', 'Enviado', 'Entregado')
     ORDER BY p.FechaPedido DESC, p.IdPedido DESC, lp.IdProducto;
 END;
 $$;

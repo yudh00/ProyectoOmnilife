@@ -154,6 +154,11 @@ async function actualizarStockProducto(idProducto, delta) {
   }
 }
 
+async function obtenerEstadosPedido() {
+  const { rows } = await db.query('SELECT IdEstado, Estado FROM Estado ORDER BY IdEstado');
+  return rows;
+}
+
 module.exports = {
   // Catalogo
   obtenerCatalogo,
@@ -175,4 +180,6 @@ module.exports = {
   // Inventario
   obtenerProductosStockBajo,
   actualizarStockProducto,
+  // Estados
+  obtenerEstadosPedido,
 };

@@ -18,7 +18,6 @@ export default function ClientTable() {
     setSearchQuery,
     loading,
     error,
-    addClient,
     updateClient,
     deleteClient,
     fetchHistorial,
@@ -49,11 +48,6 @@ export default function ClientTable() {
     setFormOpen(true);
   }
 
-  function handleNew() {
-    setEditTarget(null);
-    setFormOpen(true);
-  }
-
   async function handleSave(data: {
     firstName: string;
     lastName: string;
@@ -61,14 +55,10 @@ export default function ClientTable() {
     phone: string;
     isActive: boolean;
   }) {
+    if (!editTarget) return;
     try {
-      if (editTarget) {
-        await updateClient(editTarget.id, data);
-        showToast('Cliente editado exitosamente');
-      } else {
-        await addClient(data);
-        showToast('Cliente creado exitosamente');
-      }
+      await updateClient(editTarget.id, data);
+      showToast('Cliente editado exitosamente');
       setFormOpen(false);
     } catch (err: any) {
       showToast(err.message || 'No se pudo guardar el cliente', 'error');
@@ -112,15 +102,6 @@ export default function ClientTable() {
             className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-200 transition-colors"
           />
         </div>
-        <button
-          onClick={handleNew}
-          className="flex items-center gap-2 bg-purple-700 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-purple-800 transition-colors whitespace-nowrap"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Nuevo cliente
-        </button>
       </div>
 
       {error && (
@@ -213,12 +194,14 @@ export default function ClientTable() {
       </div>
 
       {/* Modals */}
-      <ClientFormModal
-        isOpen={formOpen}
-        client={editTarget}
-        onClose={() => setFormOpen(false)}
-        onSave={handleSave}
-      />
+      {editTarget && (
+        <ClientFormModal
+          isOpen={formOpen}
+          client={editTarget}
+          onClose={() => setFormOpen(false)}
+          onSave={handleSave}
+        />
+      )}
       <ClientHistoryModal
         client={historyClient}
         onClose={() => setHistoryClient(null)}

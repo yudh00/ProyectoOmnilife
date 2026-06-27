@@ -10,6 +10,9 @@ const ctrl = require('../controllers/ventas.controller');
 // ---------------------------------------------------------------------
 // CATALOGO (lectura publica)
 // ---------------------------------------------------------------------
+// GET /api/ventas/estados-pedido
+router.get('/estados-pedido', ctrl.getEstadosPedido);
+
 // GET /api/ventas/catalogo                     -> lista todos los productos
 // GET /api/ventas/catalogo?idCategoria=2       -> filtra por categoria
 // GET /api/ventas/catalogo?busqueda=magnus     -> busca por nombre

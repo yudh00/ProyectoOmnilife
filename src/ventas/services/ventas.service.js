@@ -205,6 +205,10 @@ async function consultarStockBajo() {
   return await repo.obtenerProductosStockBajo();
 }
 
+async function listarEstadosPedido() {
+  return await repo.obtenerEstadosPedido();
+}
+
 async function modificarStock(idProducto, delta) {
   if (!idProducto || !Number.isInteger(Number(idProducto))) {
     throw new Error('ID de producto inválido');
@@ -237,4 +241,5 @@ module.exports = {
   cambiarEstadoPedido,
   consultarStockBajo,
   modificarStock,
+  listarEstadosPedido,
 };
