@@ -1,0 +1,277 @@
+<html><head><meta charset="utf-8"/><title>Reporte de Pruebas Unitarias — Omnilife</title><style type="text/css">:root {
+  --text-primary: #111;
+  --text-secondary: #4f4f4f;
+  --success: #006633;
+  --success-bright: #80ffbf;
+  --danger: #cc071e;
+  --danger-bright: #fbdfe0;
+  --warning: #995c00;
+  --warning-bright: #ffeea8;
+  --panel: #eee;
+  --border: #949494;
+  --disabled: #6b6b6b;
+}
+
+html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+}
+body {
+  padding: 2rem 1rem;
+}
+.jesthtml-content {
+  margin: 0 auto;
+  max-width: 70rem;
+}
+header {
+  display: flex;
+  align-items: center;
+}
+#title {
+  margin: 0;
+  flex-grow: 1;
+}
+#logo {
+  height: 4rem;
+}
+#timestamp {
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+#metadata-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.additional-information-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+/** SUMMARY */
+#summary {
+  color: var(--text-primary);
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+}
+#summary > div {
+  margin-right: 0.5rem;
+  background: var(--panel);
+  padding: 1rem;
+  min-width: 15rem;
+}
+#summary > div:last-child {
+  margin-right: 0;
+}
+@media only screen and (max-width: 720px) {
+  #summary {
+    flex-direction: column;
+  }
+  #summary > div {
+    margin-right: 0;
+    margin-top: 1rem;
+  }
+  #summary > div:first-child {
+    margin-top: 0;
+  }
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.summary-passed {
+  color: var(--success);
+  border-left: 0.4rem solid var(--success);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-failed,
+.summary-obsolete-snapshots {
+  color: var(--danger);
+  border-left: 0.4rem solid var(--danger);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-pending {
+  color: var(--warning);
+  border-left: 0.4rem solid var(--warning);
+  padding-left: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+.summary-empty {
+  color: var(--disabled);
+  border-left: 0.4rem solid var(--disabled);
+  margin-bottom: 0.15rem;
+}
+
+.test-result {
+  padding: 1rem;
+  margin-bottom: 0.25rem;
+}
+.test-result:last-child {
+  border: 0;
+}
+.test-result.passed {
+  background-color: var(--success-bright);
+  color: var(--success);
+}
+.test-result.failed {
+  background-color: var(--danger-bright);
+  color: var(--danger);
+}
+.test-result.pending {
+  background-color: var(--warning-bright);
+  color: var(--warning);
+}
+
+.test-info {
+  display: flex;
+  justify-content: space-between;
+}
+.test-suitename {
+  width: 20%;
+  text-align: left;
+  font-weight: bold;
+  word-break: break-word;
+}
+.test-title {
+  width: 40%;
+  text-align: left;
+  font-style: italic;
+}
+.test-status {
+  width: 20%;
+  text-align: right;
+}
+.test-duration {
+  width: 10%;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.failureMessages {
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px dashed var(--danger);
+}
+.failureMessages.suiteFailure {
+  border-top: none;
+}
+.failureMsg {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+.suite-container {
+  margin-bottom: 1rem;
+}
+.suite-info {
+  padding: 1rem;
+  background-color: var(--panel);
+  color: var(--text-secondary);
+  border: 0.15rem solid;
+  border-color: var(--panel);
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.suite-info:hover {
+  border-color: var(--border);
+  cursor: pointer;
+}
+.suite-info .suite-path {
+  word-break: break-all;
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.suite-info .suite-time {
+  margin-left: 1rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.85rem;
+}
+.suite-info .suite-time.warn {
+  background-color: var(--danger);
+  color: #fff;
+}
+.suite-info:before {
+  content: "\2303";
+  display: inline-block;
+  margin-right: 1rem;
+  transform: rotate(180deg) translateY(0.15rem);
+}
+.suite-container[open] .suite-info:before {
+  transform: rotate(0deg) translateY(0.15rem);
+}
+
+/* CONSOLE LOGS */
+.suite-consolelog {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: var(--panel);
+}
+.suite-consolelog-header {
+  font-weight: bold;
+}
+.suite-consolelog-item {
+  padding: 0.5rem;
+}
+.suite-consolelog-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-consolelog-item-origin {
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+.suite-consolelog-item-message {
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* OBSOLETE SNAPSHOTS */
+.suite-obsolete-snapshots {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: var(--danger-bright);
+  color: var(--danger);
+}
+.suite-obsolete-snapshots-header {
+  font-weight: bold;
+}
+.suite-obsolete-snapshots-item {
+  padding: 0.5rem;
+}
+.suite-obsolete-snapshots-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-obsolete-snapshots-item-message {
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+</style></head><body><main class="jesthtml-content"><header><h1 id="title">Reporte de Pruebas Unitarias — Omnilife</h1></header><section id="metadata-container"><div id="timestamp">Started: 26/06/2026 21:07:45</div><div id="summary"><div id="suite-summary"><div class="summary-total">Suites (6)</div><div class="summary-passed ">6 passed</div><div class="summary-failed  summary-empty">0 failed</div><div class="summary-pending  summary-empty">0 pending</div></div><div id="test-summary"><div class="summary-total">Tests (112)</div><div class="summary-passed ">112 passed</div><div class="summary-failed  summary-empty">0 failed</div><div class="summary-pending  summary-empty">0 pending</div></div></div></section><details id="suite-1" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\auth.service.test.js</div><div class="suite-time">0.199s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">lanza AppError 400 si el correo tiene formato inválido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">registerClient</div><div class="test-title">lanza AppError 400 si el correo tiene formato inválido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">registerClient</div><div class="test-title">lanza AppError 400 si el nombre está vacío</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">lanza AppError 400 si la contraseña está vacía</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">registerClient</div><div class="test-title">lanza AppError 400 si la contraseña tiene menos de 6 caracteres</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">lanza AppError 401 si el usuario no existe en la BD</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">lanza AppError 401 si la contraseña no coincide</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">registerClient</div><div class="test-title">lanza AppError 409 si el correo ya está registrado</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">normaliza el correo a lowercase antes de buscarlo</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">registerClient</div><div class="test-title">registra el cliente y retorna el DTO con token</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">autenticarUsuario</div><div class="test-title">retorna el DTO de usuario autenticado con token al tener credenciales válidas</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div></div></details><details id="suite-2" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\clientes.service.test.js</div><div class="suite-time">0.518s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerHistorial</div><div class="test-title">agrupa correctamente varias líneas del mismo pedido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">actualizarCliente</div><div class="test-title">lanza AppError 400 si el ID es inválido</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">desactivarCliente</div><div class="test-title">lanza AppError 400 si el ID es inválido</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerHistorial</div><div class="test-title">lanza AppError 400 si el ID es inválido</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerCliente</div><div class="test-title">lanza AppError 400 si el ID no es un número válido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">crearCliente</div><div class="test-title">lanza AppError 400 si los datos son inválidos</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">actualizarCliente</div><div class="test-title">lanza AppError 404 si el cliente no existe</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">desactivarCliente</div><div class="test-title">lanza AppError 404 si el cliente no existe</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerCliente</div><div class="test-title">lanza AppError 404 si el cliente no existe</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerHistorial</div><div class="test-title">lanza AppError 404 si el cliente no existe</div><div class="test-status">passed</div><div class="test-duration">0.002s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">crearCliente</div><div class="test-title">lanza AppError 409 si el correo ya está registrado (code 23505)</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">actualizarCliente</div><div class="test-title">lanza AppError 409 si el nuevo correo ya lo usa otro cliente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">crearCliente</div><div class="test-title">lanza AppError 409 si el repo lanza mensaje de ya registrado</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarClientes</div><div class="test-title">llama al repo con null si no se pasa búsqueda</div><div class="test-status">passed</div><div class="test-duration">0.003s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarClientes</div><div class="test-title">mapea las filas al formato DTO del frontend</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarClientes</div><div class="test-title">normaliza string vacío a null</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerHistorial</div><div class="test-title">ordena los pedidos con el más reciente primero</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarClientes</div><div class="test-title">pasa el término de búsqueda trimmeado</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">actualizarCliente</div><div class="test-title">retorna cliente actualizado correctamente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">crearCliente</div><div class="test-title">retorna el cliente mapeado al crearse correctamente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerCliente</div><div class="test-title">retorna el cliente mapeado cuando existe</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerHistorial</div><div class="test-title">retorna historial vacío si el cliente no tiene pedidos</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">desactivarCliente</div><div class="test-title">retorna mensaje de éxito al desactivar</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div></div></details><details id="suite-3" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\financiero.service.test.js</div><div class="suite-time">0.126s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerFlujoCajaNeto</div><div class="test-title">calcula flujo neto correctamente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">calcularRentabilidadProducto</div><div class="test-title">lanza AppError 400 si el ID no es válido</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validación de fechas (compartida)</div><div class="test-title">lanza AppError 400 si falta fechaInicio o fechaFin</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validación de fechas (compartida)</div><div class="test-title">lanza AppError 400 si fechaInicio es posterior a fechaFin</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validación de fechas (compartida)</div><div class="test-title">lanza AppError 400 si las fechas no son válidas</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">calcularRentabilidadProducto</div><div class="test-title">lanza error 404 si el producto no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerFlujoCajaNeto</div><div class="test-title">retorna ceros si el repo devuelve null</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerRentabilidadPorPeriodo</div><div class="test-title">retorna ceros si el repo devuelve null</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerEstadisticasPeriodo</div><div class="test-title">retorna estadísticas parseadas correctamente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerGastosPeriodo</div><div class="test-title">retorna gastos parseados cuando hay datos</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerIngresosPeriodo</div><div class="test-title">retorna ingresos parseados cuando hay datos</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">calcularRentabilidadProducto</div><div class="test-title">retorna la rentabilidad del producto parseada</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerEstadisticasPeriodo</div><div class="test-title">retorna null si el repo devuelve null</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerRentabilidadPorPeriodo</div><div class="test-title">retorna rentabilidad parseada</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerGastosPeriodo</div><div class="test-title">retorna valores en cero si el repo devuelve null</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerIngresosPeriodo</div><div class="test-title">retorna valores en cero si el repo devuelve null</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></details><details id="suite-4" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\productos.service.test.js</div><div class="suite-time">0.118s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarProducto</div><div class="test-title">lanza error 400 si el costo de compra es cero o negativo</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarProducto</div><div class="test-title">lanza error 400 si el nombre está vacío</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarProducto</div><div class="test-title">lanza error 400 si el precio de venta es cero o negativo</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarProducto</div><div class="test-title">lanza error 400 si falta el idEstado</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">editarProducto</div><div class="test-title">lanza error 400 si no se pasa idProducto</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">eliminarProducto</div><div class="test-title">lanza error 400 si no se pasa idProducto</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">lanza error 400 si no se pasa idProducto</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">editarProducto</div><div class="test-title">lanza error 404 si el producto no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">eliminarProducto</div><div class="test-title">lanza error 404 si el producto no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">lanza error 404 si el producto no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarProducto</div><div class="test-title">retorna el ID del producto y mensaje de éxito al crearse correctamente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">editarProducto</div><div class="test-title">retorna el producto actualizado cuando existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">retorna el producto cuando existe</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">eliminarProducto</div><div class="test-title">retorna mensaje de éxito al eliminar</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div></div></details><details id="suite-5" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\validators.test.js</div><div class="suite-time">0.092s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">acumula múltiples errores en una sola excepción</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">acumula múltiples errores en una sola excepción</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">el error lanzado tiene status 400</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarLogin</div><div class="test-title">el error tiene status 400</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarLogin</div><div class="test-title">lanza AppError 400 si el correo está vacío</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">lanza AppError 400 si el correo no tiene formato válido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarLogin</div><div class="test-title">lanza AppError 400 si el correo tiene formato inválido</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">lanza AppError 400 si el correo tiene formato inválido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">lanza AppError 400 si el nombre está vacío</div><div class="test-status">passed</div><div class="test-duration">0.007s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">lanza AppError 400 si el nombre está vacío</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">lanza AppError 400 si el teléfono no tiene exactamente 8 dígitos</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarLogin</div><div class="test-title">lanza AppError 400 si la contraseña está vacía</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">lanza AppError 400 si la contraseña tiene menos de 6 caracteres</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">lanza AppError 400 si los apellidos están vacíos</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">lanza AppError 400 si los apellidos están vacíos</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarLogin</div><div class="test-title">no lanza error con credenciales válidas</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarCliente</div><div class="test-title">no lanza error con datos válidos</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">no lanza error con datos válidos</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">validarRegistro</div><div class="test-title">no lanza error si la contraseña tiene exactamente 6 caracteres</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div></div></details><details id="suite-6" class="suite-container" open=""><summary class="suite-info"><div class="suite-path">C:\Users\wtfan\OneDrive\Escritorio\Omnilife\tests\ventas.service.test.js</div><div class="suite-time">0.211s</div></summary><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">cambiarEstadoPedido</div><div class="test-title">lanza error 400 si la transicion de estado es invalida</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verDetallePedido</div><div class="test-title">lanza error 404 si el pedido no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">quitarDelCarrito</div><div class="test-title">lanza error 404 si el producto no estaba en el carrito</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">lanza error 404 si el producto no existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">confirmarPedido</div><div class="test-title">lanza error 409 si el carrito esta vacio</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarAlCarrito</div><div class="test-title">lanza error 409 si el repositorio informa stock insuficiente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">confirmarPedido</div><div class="test-title">lanza error 409 si hay stock insuficiente al confirmar</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">quitarDelCarrito</div><div class="test-title">lanza error si falta idCarrito o idProducto</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">confirmarPedido</div><div class="test-title">lanza error si falta idCliente o idCarrito</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarAlCarrito</div><div class="test-title">lanza error si falta idCliente o idProducto</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">cambiarEstadoPedido</div><div class="test-title">lanza error si falta idPedido o nuevoIdEstado</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarCatalogo</div><div class="test-title">lanza error si idCategoria no es un numero</div><div class="test-status">passed</div><div class="test-duration">0.014s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">lanza error si idProducto es invalido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarAlCarrito</div><div class="test-title">lanza error si la cantidad es cero o negativa</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarPedidosDeCliente</div><div class="test-title">lanza error si no se proporciona idCliente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verCarrito</div><div class="test-title">lanza error si no se proporciona idCliente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verDetallePedido</div><div class="test-title">lanza error si no se proporciona idPedido</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarCatalogo</div><div class="test-title">llama al repositorio con filtros cuando se pasan</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarCatalogo</div><div class="test-title">llama al repositorio sin filtros cuando no se pasan parametros</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verCarrito</div><div class="test-title">retorna carrito con subtotal calculado</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verCarrito</div><div class="test-title">retorna carrito vacio si no hay items</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">verDetallePedido</div><div class="test-title">retorna el detalle del pedido correctamente formateado</div><div class="test-status">passed</div><div class="test-duration">0.003s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">confirmarPedido</div><div class="test-title">retorna el pedido formateado al confirmar exitosamente</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">obtenerProducto</div><div class="test-title">retorna el producto cuando existe</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarPedidosDeCliente</div><div class="test-title">retorna la lista de pedidos del cliente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">listarCategorias</div><div class="test-title">retorna las categorias del repositorio</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">quitarDelCarrito</div><div class="test-title">retorna mensaje de exito al eliminar correctamente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">agregarAlCarrito</div><div class="test-title">retorna resultado cuando el producto se agrega correctamente</div><div class="test-status">passed</div><div class="test-duration"> </div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">cambiarEstadoPedido</div><div class="test-title">retorna resultado exitoso cuando la transicion es valida</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div></div></details></main></body></html>
