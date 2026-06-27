@@ -219,7 +219,7 @@ BEGIN
 
     -- Crear cabecera del pedido
     INSERT INTO Pedido (IdCliente, FechaPedido, EstadoPedido, Subtotal, Impuestos, Total)
-    VALUES (p_id_cliente, CURRENT_DATE, v_id_estado_pendiente, v_subtotal, v_impuestos, v_total)
+    VALUES (p_id_cliente, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE, v_id_estado_pendiente, v_subtotal, v_impuestos, v_total)
     RETURNING IdPedido INTO v_id_pedido;
 
     -- Crear lineas de pedido y rebajar inventario
@@ -246,10 +246,6 @@ BEGIN
     UPDATE Carrito_Producto
     SET IsEliminado = TRUE
     WHERE IdCarrito = p_id_carrito AND IsEliminado = FALSE;
-
-    -- Registrar ingreso en MovimientoCaja
-    INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
-    VALUES (TRUE, v_total, CURRENT_DATE, 'Venta - Pedido #' || v_id_pedido);
 
     -- Generar numero de pedido legible (formato PED-AAAA-NNNNNN)
     v_numero_pedido := 'PED-' || EXTRACT(YEAR FROM CURRENT_DATE) || '-' || LPAD(v_id_pedido::TEXT, 6, '0');

@@ -174,6 +174,15 @@ async function patchModificarStock(req, res) {
   }
 }
 
+async function getEstadosPedido(req, res) {
+  try {
+    const estados = await service.listarEstadosPedido();
+    return res.json({ ok: true, data: estados });
+  } catch (err) {
+    return manejarError(res, err);
+  }
+}
+
 module.exports = {
   getCatalogo,
   getCategorias,
@@ -187,5 +196,6 @@ module.exports = {
   getDetallePedido,
   patchEstadoPedido,
   getStockBajo,
-  patchModificarStock, // Exportamos la nueva función
+  patchModificarStock,
+  getEstadosPedido,
 };
