@@ -12,13 +12,15 @@ import Toast from "./components/ui/Toast";
 import type { ToastMessage } from "./components/ui/Toast";
 import ProductFormModal from "./components/products/ProductFormModal";
 import OrdersPage from "./components/orders/OrdersPage";
+import MyOrdersPage from "./components/orders/MyOrdersPage";
 import { useCart } from "./hooks/useCart";
 import { useProducts } from "./hooks/useProducts";
 import { useAuth } from "./hooks/useAuth";
 import type { Product, ProductCategory } from "./types";
 import AdminGuard from "./guards/AdminGuard";
+import ClientGuard from "./guards/ClientGuard";
 
-type Page = "home" | "catalog" | "clients" | "finances" | "orders";
+type Page = "home" | "catalog" | "clients" | "finances" | "orders" | "my-orders";
 let toastIdCounter = 0;
 
 function App() {
@@ -40,6 +42,9 @@ function App() {
   // Efecto de seguridad para vistas protegidas
   useEffect(() => {
     if ((currentPage === "clients" || currentPage === "finances" || currentPage === "orders") && (!isAuthenticated || !isAdmin)) {
+      setCurrentPage("home");
+    }
+    if (currentPage === "my-orders" && !isAuthenticated) {
       setCurrentPage("home");
     }
   }, [isAuthenticated, isAdmin, currentPage]);
@@ -175,6 +180,12 @@ function App() {
           <AdminGuard>
             <OrdersPage />
           </AdminGuard>
+        )}
+
+        {currentPage === "my-orders" && (
+          <ClientGuard>
+            <MyOrdersPage />
+          </ClientGuard>
         )}
       </main>
 

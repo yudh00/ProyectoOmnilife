@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useOrders } from '../../hooks/useOrders';
 import type { Order } from '../../hooks/useOrders';
+import OrderDetailModal from './OrderDetailModal';
 
 const ESTADO_BADGE: Record<string, string> = {
   Pendiente: 'bg-amber-100 text-amber-700',
@@ -33,11 +34,12 @@ interface ClientGroup {
 }
 
 export default function OrdersPage() {
-  const { orders, estados, loading, error, updateEstado, refresh } = useOrders();
+  const { orders, estados, loading, error, updateEstado, fetchDetalle, refresh } = useOrders();
   const [filterEstado, setFilterEstado]   = useState('Todos');
   const [filterCliente, setFilterCliente] = useState('');
   const [updating, setUpdating]           = useState<number | null>(null);
   const [toast, setToast]                 = useState<{ msg: string; ok: boolean } | null>(null);
+  const [detailOrder, setDetailOrder]     = useState<Order | null>(null);
 
   function showToast(msg: string, ok = true) {
     setToast({ msg, ok });
@@ -79,11 +81,11 @@ export default function OrdersPage() {
       .map((g) => ({
         ...g,
         orders: [...g.orders].sort(
-          (a, b) => new Date(a.fechaPedido + 'T12:00:00').getTime() - new Date(b.fechaPedido + 'T12:00:00').getTime()
+          (a, b) => new Date(a.fechaPedido).getTime() - new Date(b.fechaPedido).getTime()
         ),
       }))
       .sort(
-        (a, b) => new Date(a.orders[0].fechaPedido + 'T12:00:00').getTime() - new Date(b.orders[0].fechaPedido + 'T12:00:00').getTime()
+        (a, b) => new Date(a.orders[0].fechaPedido).getTime() - new Date(b.orders[0].fechaPedido).getTime()
       );
   }, [orders, filterEstado, filterCliente]);
 
@@ -225,7 +227,7 @@ export default function OrdersPage() {
                       <tr key={order.idPedido} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
                         <td className="px-5 py-3 font-mono text-xs text-gray-500">{order.numeroPedido}</td>
                         <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                          {new Date(order.fechaPedido + 'T12:00:00').toLocaleDateString('es-CR', {
+                          {new Date(order.fechaPedido).toLocaleDateString('es-CR', {
                             day: '2-digit', month: 'short', year: 'numeric',
                           })}
                         </td>
@@ -240,6 +242,19 @@ export default function OrdersPage() {
                         </td>
                         <td className="px-5 py-3">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setDetailOrder(order)}
+                              className="p-1.5 rounded-lg text-purple-400 hover:text-purple-700 hover:bg-purple-50 transition-colors"
+                              title="Ver detalle del pedido"
+                              aria-label={`Ver detalle de ${order.numeroPedido}`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
                             {isUpdating ? (
                               <span className="w-4 h-4 border-2 border-purple-300 border-t-purple-700 rounded-full animate-spin" />
                             ) : nexts.map((next) => (
@@ -270,6 +285,12 @@ export default function OrdersPage() {
           {toast.msg}
         </div>
       )}
+
+      <OrderDetailModal
+        order={detailOrder}
+        onClose={() => setDetailOrder(null)}
+        fetchDetalle={fetchDetalle}
+      />
     </div>
   );
 }

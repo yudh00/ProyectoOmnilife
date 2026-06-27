@@ -81,10 +81,11 @@ function crearServicioAuth(repo) {
    * @param {string} datosCliente.apellidos
    * @param {string} datosCliente.email
    * @param {string} datosCliente.password
+   * @param {string} datosCliente.telefono
    */
-  async function registerClient({ nombre, apellidos, email, password }) {
+  async function registerClient({ nombre, apellidos, email, password, telefono }) {
     // 1. SRP: Validar formato usando las reglas aisladas de tu validador
-    validator.validarRegistro({ nombre, apellidos, email, password });
+    validator.validarRegistro({ nombre, apellidos, email, password, telefono });
 
     const emailFormateado = email.trim().toLowerCase();
 
@@ -103,7 +104,8 @@ function crearServicioAuth(repo) {
       nombre: nombre.trim(),
       apellidos: apellidos.trim(),
       email: emailFormateado,
-      contrasenaHash
+      contrasenaHash,
+      telefono: telefono.trim()
     });
 
     // 5. UX: Emitir un token de una vez para que quede logueado tras registrarse

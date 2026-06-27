@@ -17,6 +17,25 @@ export interface EstadoPedido {
   estado: string;
 }
 
+export interface OrderDetailLine {
+  idProducto: number;
+  nombreProducto: string;
+  cantidad: number;
+  precioCongelado: number;
+  subtotalLinea: number;
+}
+
+export interface OrderDetail {
+  idPedido: number;
+  numeroPedido: string;
+  fechaPedido: string;
+  estado: string;
+  subtotal: number;
+  impuestos: number;
+  total: number;
+  lineas: OrderDetailLine[];
+}
+
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [estados, setEstados] = useState<EstadoPedido[]>([]);
@@ -67,10 +86,19 @@ export function useOrders() {
     await fetchOrders();
   }, [fetchOrders]);
 
+  // El detalle completo (líneas con producto/cantidad/precio) solo se pide
+  // bajo demanda — el listado de /pedidos/admin no lo incluye.
+  const fetchDetalle = useCallback(async (idPedido: number): Promise<OrderDetail> => {
+    const res = await fetch(`${API_BASE_URL}/ventas/pedidos/${idPedido}`);
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Error al cargar el detalle del pedido');
+    return data.data as OrderDetail;
+  }, []);
+
   useEffect(() => {
     fetchOrders();
     fetchEstados();
   }, [fetchOrders, fetchEstados]);
 
-  return { orders, estados, loading, error, updateEstado, refresh: fetchOrders };
+  return { orders, estados, loading, error, updateEstado, fetchDetalle, refresh: fetchOrders };
 }

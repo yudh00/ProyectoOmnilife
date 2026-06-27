@@ -33,9 +33,9 @@ async function buscarUsuarioPorCorreo(correo) {
  * Inserta un nuevo usuario en la base de datos asignándole por defecto el IdRol = 2 (Cliente).
  * Devuelve los datos del nuevo usuario junto con el NombreRol gracias al INNER JOIN en la inserción.
  */
-async function crearUsuarioCliente({ nombre, apellidos, email, contrasenaHash }) {
+async function crearUsuarioCliente({ nombre, apellidos, email, contrasenaHash, telefono }) {
   const client = await db.pool.connect();
-  
+
   try {
     await client.query('BEGIN'); // Iniciar transacción
 
@@ -48,7 +48,14 @@ async function crearUsuarioCliente({ nombre, apellidos, email, contrasenaHash })
     const resUsuario = await client.query(queryUsuario, [nombre, apellidos, email, contrasenaHash]);
     const idUsuario = resUsuario.rows[0].idusuario;
 
-    // 2. Insertar en tabla Cliente usando el ID generado
+    // 2. Registrar el teléfono principal activo del usuario
+    const queryTelefono = `
+      INSERT INTO TelefonoUsuario (IdUsuario, TelefonoUsuario, IsActivo)
+      VALUES ($1, $2, TRUE);
+    `;
+    await client.query(queryTelefono, [idUsuario, telefono]);
+
+    // 3. Insertar en tabla Cliente usando el ID generado
     const queryCliente = `
       INSERT INTO Cliente (IdUsuario, IsActivo, NotaAsesoria)
       VALUES ($1, TRUE, 'Nuevo cliente registrado desde la App')

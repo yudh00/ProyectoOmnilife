@@ -27,6 +27,7 @@ export interface RegisterCredentials {
   apellidos: string;
   email: string;
   password: string;
+  telefono: string;
 }
 
 // ─── Client Types ─────────────────────────────────────────────────────────────
