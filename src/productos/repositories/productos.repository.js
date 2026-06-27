@@ -45,6 +45,14 @@ async function crearProducto({ nombre, descripcion, imagenRuta, costoCompra, pre
       );
     }
 
+    if (cantidad > 0 && costoCompra > 0) {
+      await client.query(
+        `INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
+         VALUES (FALSE, $1, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE, $2)`,
+        [costoCompra * cantidad, `Compra inventario: ${nombre}`]
+      );
+    }
+
     await client.query('COMMIT');
     return idProducto;
   } catch (err) {

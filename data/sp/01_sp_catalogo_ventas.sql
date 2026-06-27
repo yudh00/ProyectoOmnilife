@@ -219,7 +219,7 @@ BEGIN
 
     -- Crear cabecera del pedido
     INSERT INTO Pedido (IdCliente, FechaPedido, EstadoPedido, Subtotal, Impuestos, Total)
-    VALUES (p_id_cliente, CURRENT_DATE, v_id_estado_pendiente, v_subtotal, v_impuestos, v_total)
+    VALUES (p_id_cliente, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE, v_id_estado_pendiente, v_subtotal, v_impuestos, v_total)
     RETURNING IdPedido INTO v_id_pedido;
 
     -- Crear lineas de pedido y rebajar inventario

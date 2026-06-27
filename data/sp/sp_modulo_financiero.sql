@@ -36,7 +36,7 @@ BEGIN
             VALUES (
                 FALSE,
                 NEW.Total,
-                CURRENT_DATE,
+                (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE,
                 'Pedido ' || v_numero_pedido || ' cancelado - Reembolso'
             );
         END IF;

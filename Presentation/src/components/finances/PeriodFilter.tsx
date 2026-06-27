@@ -4,11 +4,16 @@ interface PeriodFilterProps {
   onFilterChange: (fechaInicio: string, fechaFin: string) => void;
 }
 
+function localDate(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function PeriodFilter({ onFilterChange }: PeriodFilterProps) {
+  const now = new Date();
   const [fechaInicio, setFechaInicio] = useState(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
+    localDate(new Date(now.getFullYear(), now.getMonth(), 1))
   );
-  const [fechaFin, setFechaFin] = useState(new Date().toISOString().split('T')[0]);
+  const [fechaFin, setFechaFin] = useState(localDate());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

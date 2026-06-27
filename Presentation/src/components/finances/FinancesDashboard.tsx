@@ -10,10 +10,12 @@ export default function FinancesDashboard() {
 
   const [fechaInicio, setFechaInicio] = useState(() => {
     const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0];
+    const first = new Date(d.getFullYear(), d.getMonth(), 1);
+    return `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-01`;
   });
   const [fechaFin, setFechaFin] = useState(() => {
-    return new Date().toISOString().split("T")[0];
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
   useEffect(() => {
