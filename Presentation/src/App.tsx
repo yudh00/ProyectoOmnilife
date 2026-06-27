@@ -79,12 +79,13 @@ function App() {
       const result = await cart.confirmOrder();
       cart.closeCart();
       showToast(`Pedido ${result.numeroPedido} confirmado. Total: ₡${result.total.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`);
+      refreshProducts();
     } catch (err: any) {
       showToast(err.message || 'Error al confirmar el pedido', 'error');
     } finally {
       setConfirmingOrder(false);
     }
-  }, [cart, showToast]);
+  }, [cart, showToast, refreshProducts]);
 
   const filteredProducts = products.filter((p) => {
     const matchesCategory = activeCategory === "Todos" || p.category === activeCategory;
