@@ -33,10 +33,10 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
             {/* Copy */}
             <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Mas de 200 productos de belleza
+                Más de 200 productos de belleza
               </h1>
               <div className="inline-block bg-purple-700 text-white text-4xl sm:text-5xl lg:text-6xl font-bold px-4 py-1 mt-2 rounded-xl">
-                y nutricion
+                y nutrición.
               </div>
               <p className="mt-5 text-gray-500 text-base sm:text-lg max-w-lg mx-auto lg:mx-0">
                 Elaborados con tecnologia de punta, para fomentar tu bienestar
@@ -70,7 +70,7 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
       {/* CATEGORY CARDS */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-8">
-          Nuestras categorias
+          Nuestras categorías
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <button
@@ -101,7 +101,7 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-purple-700/30 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6">
               <span className="text-xs font-semibold text-purple-200 uppercase tracking-wider">SEYTU</span>
-              <h3 className="text-white text-xl font-bold mt-1">Cosmeticos</h3>
+              <h3 className="text-white text-xl font-bold mt-1">Cosméticos</h3>
             </div>
           </button>
         </div>
@@ -128,7 +128,7 @@ export default function HeroSection({ onNavigateToCatalog }: HeroSectionProps) {
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="font-semibold">Envio rapido</p>
+              <p className="font-semibold">Envío rápido</p>
               <p className="text-purple-200 text-sm">Recibe tu pedido en la puerta de tu casa</p>
             </div>
             <div className="flex flex-col items-center gap-2">
