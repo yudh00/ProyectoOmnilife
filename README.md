@@ -98,7 +98,10 @@ Desde la raíz del proyecto:
 
 ```bash
 npm install
+npm install bcryptjs
+npm install react-hot-toast
 ```
+
 
 ### 3. Configurar variables de entorno
 

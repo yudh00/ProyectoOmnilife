@@ -98,7 +98,7 @@ export default function Navbar({
             )}
           </div>
 
-            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+            <div className="flex flex-wrap items-center justify-end gap-2 ml-auto flex-shrink-0">
             {/* EL CARRITO AHORA SOLO APARECE SI ESTÁ LOGEADO Y NO ES ADMIN */}
             {isAuthenticated && !isAdmin && (
               <button
@@ -121,15 +121,15 @@ export default function Navbar({
             {/* Botones de sesión con triggers para abrir los modales correspondientes */}
             {!isAuthenticated && (
               <>
-                <button 
+                <button
                   onClick={() => setIsLoginOpen(true)}
-                  className="hidden sm:block text-sm text-purple-700 font-medium border border-purple-300 px-3 py-1.5 rounded-full hover:bg-purple-50 transition-colors whitespace-nowrap"
+                  className="text-xs sm:text-sm text-purple-700 font-medium border border-purple-300 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-purple-50 transition-colors whitespace-nowrap"
                 >
                   Iniciar Sesión
                 </button>
-                <button 
+                <button
                   onClick={() => setIsRegisterOpen(true)}
-                  className="hidden md:block text-sm text-white font-medium bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-800 transition-colors whitespace-nowrap"
+                  className="text-xs sm:text-sm text-white font-medium bg-purple-700 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-purple-800 transition-colors whitespace-nowrap"
                 >
                   Registrarse
                 </button>
@@ -137,13 +137,13 @@ export default function Navbar({
             )}
 
             {isAuthenticated && currentUser && (
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-block text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                   {currentUser.nombreRol}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-red-500 border border-red-200 px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors"
+                  className="text-xs sm:text-sm text-red-500 border border-red-200 px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors whitespace-nowrap"
                 >
                   Salir
                 </button>
@@ -154,8 +154,8 @@ export default function Navbar({
 
         {/* Navigation bar */}
         <nav className="bg-purple-700">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <ul className="flex items-center gap-1 text-white text-sm">
+          <div className="w-full px-4 sm:px-6 lg:px-8 overflow-x-auto">
+            <ul className="flex items-center gap-1 text-white text-sm w-max min-w-full">
               {/* 1. INICIO: Siempre visible para todos */}
               <li>
                 <button
