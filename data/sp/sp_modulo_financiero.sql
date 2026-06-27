@@ -5,11 +5,53 @@
 -- DESCRIPCIÓN:
 --   Centraliza ingresos por ventas y gastos operativos.
 --   Calcula rentabilidad, flujo de caja neto y estadísticas.
---   SOLUCIONA BUG CRÍTICO: Cancelación de pedido revierte MovimientoCaja
--- 
+--   TRIGGER de ingreso: registra en MovimientoCaja cuando pedido pasa a Pagado
+--   TRIGGER de egreso: registra en MovimientoCaja cuando pedido es Cancelado
+--   TRIGGER de stock: sincroniza EstadoProducto (Disponible/Agotado) con inventario
+--
 -- EJECUCIÓN:
 --   psql -U postgres -d ProyectoIngeneria -f data/sp/sp_modulo_financiero.sql
 -- =====================================================================
+
+
+-- =====================================================================
+-- 0. TRIGGER: sincronizar EstadoProducto cuando cambia el inventario
+--    Cuando CantidadInventarioProducto llega a 0 → EstadoProducto = 'Agotado'
+--    Cuando CantidadInventarioProducto > 0 → EstadoProducto = 'Disponible'
+-- =====================================================================
+CREATE OR REPLACE FUNCTION trg_sincronizar_estado_inventario()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_id_disponible INT;
+    v_id_agotado    INT;
+BEGIN
+    SELECT IdEstado INTO v_id_disponible FROM Estado WHERE Estado = 'Disponible' LIMIT 1;
+    SELECT IdEstado INTO v_id_agotado    FROM Estado WHERE Estado = 'Agotado'    LIMIT 1;
+
+    IF v_id_disponible IS NULL OR v_id_agotado IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    IF NEW.CantidadInventarioProducto <= 0 THEN
+        UPDATE Producto SET EstadoProducto = v_id_agotado
+        WHERE IdProducto = NEW.IdProducto AND EstadoProducto = v_id_disponible;
+    ELSE
+        UPDATE Producto SET EstadoProducto = v_id_disponible
+        WHERE IdProducto = NEW.IdProducto AND EstadoProducto = v_id_agotado;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS inventario_sync_estado_producto ON Inventario;
+
+CREATE TRIGGER inventario_sync_estado_producto
+AFTER UPDATE OF CantidadInventarioProducto ON Inventario
+FOR EACH ROW
+EXECUTE FUNCTION trg_sincronizar_estado_inventario();
 
 
 

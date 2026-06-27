@@ -247,10 +247,6 @@ BEGIN
     SET IsEliminado = TRUE
     WHERE IdCarrito = p_id_carrito AND IsEliminado = FALSE;
 
-    -- Registrar ingreso en MovimientoCaja
-    INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
-    VALUES (TRUE, v_total, CURRENT_DATE, 'Venta - Pedido #' || v_id_pedido);
-
     -- Generar numero de pedido legible (formato PED-AAAA-NNNNNN)
     v_numero_pedido := 'PED-' || EXTRACT(YEAR FROM CURRENT_DATE) || '-' || LPAD(v_id_pedido::TEXT, 6, '0');
 
