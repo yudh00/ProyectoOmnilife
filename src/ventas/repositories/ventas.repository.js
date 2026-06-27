@@ -132,25 +132,110 @@ async function obtenerProductosStockBajo() {
   return rows;
 }
 
-// NUEVA FUNCION PARA ACTUALIZAR STOCK EN BD
+// Actualizar stock desde botones +/-.
+// delta > 0 (compra): registra egreso en MovimientoCaja.
+// delta < 0 (ajuste rápido): solo actualiza inventario, sin movimiento financiero.
 async function actualizarStockProducto(idProducto, delta) {
-  // Realizamos el UPDATE directamente con SQL puro.
-  // La condición (Stock + $1) >= 0 asegura que no el stock no baje de cero.
-  const sql = `
-    UPDATE Inventario 
-    SET CantidadInventarioProducto = CantidadInventarioProducto + $1 
-    WHERE IdProducto = $2 
-    AND (CantidadInventarioProducto + $1) >= 0
-    RETURNING CantidadInventarioProducto;
-  `;
-  
+  const client = await db.connect();
   try {
-    const { rowCount } = await db.query(sql, [delta, idProducto]);
-    // Si rowCount es > 0, significa que se actualizó el registro exitosamente
-    return rowCount > 0;
+    await client.query('BEGIN');
+
+    const sqlInv = `
+      UPDATE Inventario
+      SET CantidadInventarioProducto = CantidadInventarioProducto + $1
+      WHERE IdProducto = $2
+        AND (CantidadInventarioProducto + $1) >= 0
+      RETURNING CantidadInventarioProducto;
+    `;
+    const invResult = await client.query(sqlInv, [delta, idProducto]);
+
+    if (invResult.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+
+    // Solo registrar movimiento financiero al COMPRAR stock (+)
+    if (delta > 0) {
+      const sqlCosto = `SELECT NombreProducto, CostoCompraProducto FROM Producto WHERE IdProducto = $1`;
+      const { rows } = await client.query(sqlCosto, [idProducto]);
+      const p = rows[0];
+      if (p) {
+        const monto = parseFloat(p.costocompraproducto) * delta;
+        const concepto = `Compra inventario: +${delta} u. de ${p.nombreproducto}`;
+        await client.query(
+          `INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
+           VALUES (FALSE, $1, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE, $2)`,
+          [monto, concepto]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    return true;
   } catch (err) {
-    console.error("Error en BD al actualizar stock:", err);
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    console.error('Error en BD al actualizar stock:', err);
     return false;
+  } finally {
+    client.release();
+  }
+}
+
+// Retorno de inventario: reduce stock y registra egreso negativo en MovimientoCaja.
+// El monto negativo hace que SUM() en sp_obtener_gastos_periodo descuente el gasto.
+async function retornarStockProducto(idProducto, cantidad) {
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Verificar stock actual y obtener datos del producto
+    const sqlProducto = `
+      SELECT p.NombreProducto, p.CostoCompraProducto, i.CantidadInventarioProducto
+      FROM Producto p
+      JOIN Inventario i ON i.IdProducto = p.IdProducto
+      WHERE p.IdProducto = $1;
+    `;
+    const { rows } = await client.query(sqlProducto, [idProducto]);
+    const p = rows[0];
+
+    if (!p) {
+      await client.query('ROLLBACK');
+      return { ok: false, error: 'Producto no encontrado' };
+    }
+
+    const stockActual = parseInt(p.cantidadinventarioproducto, 10);
+    if (cantidad <= 0) {
+      await client.query('ROLLBACK');
+      return { ok: false, error: 'La cantidad debe ser mayor a 0' };
+    }
+    if (cantidad > stockActual) {
+      await client.query('ROLLBACK');
+      return { ok: false, error: `Stock insuficiente. Stock actual: ${stockActual}` };
+    }
+
+    // Reducir stock
+    await client.query(
+      `UPDATE Inventario SET CantidadInventarioProducto = CantidadInventarioProducto - $1 WHERE IdProducto = $2`,
+      [cantidad, idProducto]
+    );
+
+    // Egreso negativo → descuenta de gastos
+    const monto = -(parseFloat(p.costocompraproducto) * cantidad);
+    const concepto = `Retiro inventario: -${cantidad} u. de ${p.nombreproducto}`;
+    await client.query(
+      `INSERT INTO MovimientoCaja (TipoMovimiento, Monto, Fecha, Concepto)
+       VALUES (FALSE, $1, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Costa_Rica')::DATE, $2)`,
+      [monto, concepto]
+    );
+
+    await client.query('COMMIT');
+    return { ok: true, nuevoStock: stockActual - cantidad };
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    console.error('Error en retorno de inventario:', err);
+    return { ok: false, error: 'Error interno al procesar el retorno' };
+  } finally {
+    client.release();
   }
 }
 
@@ -180,6 +265,7 @@ module.exports = {
   // Inventario
   obtenerProductosStockBajo,
   actualizarStockProducto,
+  retornarStockProducto,
   // Estados
   obtenerEstadosPedido,
 };

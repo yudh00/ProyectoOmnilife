@@ -55,6 +55,10 @@ export default function ProductFormModal({ isOpen, productId, onClose, onSaved }
   const [loadingData, setLoadingData] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [retornoCantidad, setRetornoCantidad] = useState('');
+  const [retornoError, setRetornoError] = useState<string | null>(null);
+  const [retornoExito, setRetornoExito] = useState<string | null>(null);
+  const [retornando, setRetornando] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -64,6 +68,9 @@ export default function ProductFormModal({ isOpen, productId, onClose, onSaved }
     setImageFile(null);
     setImagePreview(null);
     setServerError(null);
+    setRetornoCantidad('');
+    setRetornoError(null);
+    setRetornoExito(null);
 
     // Cargar categorías
     fetch(`${API_BASE_URL}/ventas/categorias`)
@@ -302,6 +309,68 @@ export default function ProductFormModal({ isOpen, productId, onClose, onSaved }
                 <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
                   {serverError}
                 </p>
+              )}
+
+              {/* Retorno de cantidad — solo en modo edición */}
+              {isEdit && (
+                <div className="border border-orange-200 bg-orange-50 rounded-xl p-4 flex flex-col gap-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-orange-800">Retornar cantidad al proveedor</h3>
+                    <p className="text-xs text-orange-600 mt-0.5">
+                      Ingresá la cantidad a retirar. No puede superar el stock actual ({form.cantidad} u.) ni ser negativa.
+                    </p>
+                  </div>
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <input
+                        type="number"
+                        min="1"
+                        max={Number(form.cantidad)}
+                        step="1"
+                        placeholder="Cantidad a retornar"
+                        value={retornoCantidad}
+                        onChange={(e) => { setRetornoCantidad(e.target.value); setRetornoError(null); setRetornoExito(null); }}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 transition-colors ${
+                          retornoError ? 'border-red-400 focus:ring-red-200' : 'border-orange-300 focus:border-orange-400 focus:ring-orange-200'
+                        }`}
+                      />
+                      {retornoError && <p className="text-xs text-red-500 mt-1">{retornoError}</p>}
+                      {retornoExito && <p className="text-xs text-green-600 mt-1 font-semibold">{retornoExito}</p>}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={retornando || !retornoCantidad}
+                      onClick={async () => {
+                        const cant = parseInt(retornoCantidad, 10);
+                        const stockActual = parseInt(form.cantidad, 10);
+                        if (!cant || cant <= 0) { setRetornoError('La cantidad debe ser mayor a 0'); return; }
+                        if (cant > stockActual) { setRetornoError(`No puede superar el stock actual (${stockActual})`); return; }
+                        setRetornando(true);
+                        setRetornoError(null);
+                        setRetornoExito(null);
+                        try {
+                          const res = await fetch(`${API_BASE_URL}/ventas/inventario/${productId}/retorno`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ cantidad: cant }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok || !data.ok) throw new Error(data.error || 'Error al retornar');
+                          setRetornoExito(`✓ ${cant} unidad(es) retirada(s). Nuevo stock: ${data.data.nuevoStock}`);
+                          setForm(prev => ({ ...prev, cantidad: String(data.data.nuevoStock) }));
+                          setRetornoCantidad('');
+                        } catch (err: any) {
+                          setRetornoError(err.message);
+                        } finally {
+                          setRetornando(false);
+                        }
+                      }}
+                      className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {retornando ? 'Retornando...' : 'Retornar'}
+                    </button>
+                  </div>
+                </div>
               )}
             </>
           )}

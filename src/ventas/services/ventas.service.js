@@ -213,8 +213,6 @@ async function modificarStock(idProducto, delta) {
   if (!idProducto || !Number.isInteger(Number(idProducto))) {
     throw new Error('ID de producto inválido');
   }
-  console.log('Delta recibido:', delta);  
-  console.log('ID de producto:', idProducto);
   const exito = await repo.actualizarStockProducto(idProducto, delta);
   
   if (!exito) {
@@ -225,6 +223,14 @@ async function modificarStock(idProducto, delta) {
   }
   
   return { mensaje: 'Stock actualizado correctamente' };
+}
+
+async function retornarStock(idProducto, cantidad) {
+  const id = parseInt(idProducto, 10);
+  const cant = parseInt(cantidad, 10);
+  if (!Number.isInteger(id) || id <= 0) throw new Error('ID de producto inválido');
+  if (!Number.isInteger(cant) || cant <= 0) throw new Error('La cantidad debe ser un entero positivo');
+  return await repo.retornarStockProducto(id, cant);
 }
 
 module.exports = {
@@ -241,5 +247,6 @@ module.exports = {
   cambiarEstadoPedido,
   consultarStockBajo,
   modificarStock,
+  retornarStock,
   listarEstadosPedido,
 };
